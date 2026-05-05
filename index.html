@@ -1190,12 +1190,12 @@
 
     function renderBoard(){
       const g = state.game;
-      els.scoreLabel.textContent = g ? `${g.home} vs ${g.away}` : 'TOKYO BLUE STARS 監督室';
+      els.scoreLabel.textContent = g && g.home ? `${g.home} vs ${g.away}` : 'TOKYO BLUE STARS 監督室';
       els.phasePill.textContent = state.mode.toUpperCase();
-      els.modePill.textContent = g ? (g.pitchMode === 'auto' ? 'AUTO' : 'MANUAL') : 'AUTO';
+      els.modePill.textContent = g && g.pitchMode === 'manual' ? '球種選択' : '球種オート';
       els.pitchTypePill.textContent = g ? (g.pitchType || '-') : '-';
-      els.inningPill.textContent = g ? `${g.inning}回${g.half === 'top' ? '表' : '裏'}` : '-';
-      els.homeScore.textContent = g ? g.homeScore : '0'; els.awayScore.textContent = g ? g.awayScore : '0';
+      els.inningPill.textContent = g && g.inning ? `${g.inning}回${g.half === 'top' ? '表' : '裏'}` : '-';
+      els.homeScore.textContent = g && g.homeScore !== undefined ? g.homeScore : '0'; els.awayScore.textContent = g && g.awayScore !== undefined ? g.awayScore : '0';
       
       const isEvent = ['event', 'ceremony', 'halftime', 'hero', 'ending', 'select_starter'].includes(state.mode);
       els.tvline.style.display = isEvent ? 'none' : 'flex';
@@ -1204,7 +1204,7 @@
       if(isEvent) els.narration.className = 'narration event-narration';
       else els.narration.className = 'narration';
 
-      if(g && !isEvent){
+      if(g && !isEvent && g.bases){
         els.offenseTeam.textContent = g.offense === 'home' ? g.home : g.away;
         
         const bObj = currentOffenseBatter(); const pObj = currentDefensivePitcher();
@@ -1225,17 +1225,17 @@
         els.baseChip.textContent = getBaseText();
       }
 
-      [els.b1,els.b2,els.b3,els.b4].forEach((el,i)=>el.classList.toggle('on', g && i < g.balls));
-      [els.s1,els.s2,els.s3].forEach((el,i)=>el.classList.toggle('on', g && i < g.strikes));
-      [els.o1,els.o2,els.o3].forEach((el,i)=>el.classList.toggle('on', g && i < g.outs));
+      [els.b1,els.b2,els.b3,els.b4].forEach((el,i)=>el.classList.toggle('on', g && g.balls !== undefined && i < g.balls));
+      [els.s1,els.s2,els.s3].forEach((el,i)=>el.classList.toggle('on', g && g.strikes !== undefined && i < g.strikes));
+      [els.o1,els.o2,els.o3].forEach((el,i)=>el.classList.toggle('on', g && g.outs !== undefined && i < g.outs));
       
-      const b = g ? g.bases : [null,null,null];
+      const b = g && g.bases ? g.bases : [null,null,null];
       els.base1.classList.toggle('active', !!b[0]); els.base2.classList.toggle('active', !!b[1]); els.base3.classList.toggle('active', !!b[2]);
 
       els.inningBoard.innerHTML = '';
       for(let i=0;i<9;i++){
         const cell = document.createElement('div'); cell.className = 'inning-cell';
-        cell.innerHTML = `<div>${i+1}</div><div class="tiny">${g ? g.inningRuns.away[i] : '-'}/${g ? g.inningRuns.home[i] : '-'}</div>`;
+        cell.innerHTML = `<div>${i+1}</div><div class="tiny">${g && g.inningRuns ? g.inningRuns.away[i] : '-'}/${g && g.inningRuns ? g.inningRuns.home[i] : '-'}</div>`;
         els.inningBoard.appendChild(cell);
       }
     }
