@@ -274,12 +274,32 @@
     .tutorial-step { font-size: 13px; font-weight: bold; color: var(--muted); }
     .tutorial-controls { display: flex; gap: 12px; }
 
+    /* Demo Overlay */
+    #demoOverlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.1); /* 背景の曇り(blur)と暗さを取り除きました */
+      z-index: 9998; display: none; align-items: flex-end; justify-content: center;
+      padding-bottom: 80px; cursor: pointer;
+    }
+    .demo-text {
+      text-align: center; color: var(--gold); font-size: 32px; font-weight: 900;
+      text-shadow: 0 4px 15px rgba(0,0,0,0.9), 0 0 20px rgba(255,214,108,0.5);
+      animation: blinkDemo 2s infinite; margin: 0; line-height: 1.2;
+      pointer-events: none;
+    }
+    .demo-text span { font-size: 20px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
+    @keyframes blinkDemo {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
     @media (max-width: 1180px) { .app, .top-panels, .game-layout { grid-template-columns: 1fr; } }
     @media (max-width: 760px) {
       body { padding: 8px; } .scoreboard { grid-template-columns: 1fr auto auto; }
       .actions.secondary { grid-template-columns: 1fr; } .mini-grid { grid-template-columns: 1fr; }
       .slot-actions button, .actions button { width: 100%; }
       .tutorial-card { padding: 20px; }
+      .demo-text { font-size: 26px; }
     }
   </style>
 </head>
@@ -297,6 +317,11 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- デモオーバーレイ -->
+  <div id="demoOverlay">
+    <h1 class="demo-text">DEMONSTRATION<br><span>CLICK TO START</span></h1>
   </div>
 
   <div class="app">
@@ -471,6 +496,7 @@
     function endTutorial() {
       tutorialOverlay.style.display = 'none';
       localStorage.setItem('pmdx_tutorial_done', 'true');
+      resetIdleTimer();
     }
 
     // ---- THEME & SYSTEM ----
@@ -510,7 +536,7 @@
         showTitle();
         addLog('ゲームデータを初期化しました。', 'special');
         this.textContent = 'データをリセット';
-        setTimeout(showTutorial, 400); // リセット後、チュートリアルを再表示
+        setTimeout(showTutorial, 400); 
       }
     });
 
@@ -683,7 +709,7 @@
         standings: LEAGUE_TEAMS.map(name => ({name,w:0,l:0})), record:{w:0,l:0},
         logs:[{text:'Pennant Manager DX へようこそ。',type:'em'}],
         roster:{ hitters:createHomeHitters(), pitchers:createHomePitchers() },
-        game:null, gameBackup:null
+        game:null, gameBackup:null, isDemo: false
       };
     }
 
@@ -721,6 +747,98 @@
     }
 
     let state = createState();
+    let demoStepTimer = null;
+    let idleTimer = null;
+
+    function resetIdleTimer() {
+      clearTimeout(idleTimer);
+      // チュートリアル表示中はデモに移行しない
+      if ($('tutorialOverlay').style.display === 'flex') return;
+      if (state && !state.isDemo && state.mode === 'title') {
+        idleTimer = setTimeout(startDemo, 15000); // 15秒放置でデモ開始
+      }
+    }
+
+    document.addEventListener('click', () => {
+      if (state && !state.isDemo) {
+        resetIdleTimer();
+      }
+    });
+
+    const demoOverlay = $('demoOverlay');
+    demoOverlay.addEventListener('click', (e) => {
+      e.stopPropagation();
+      stopDemo();
+      initAudio();
+    });
+
+    function startDemo() {
+      if (state.isDemo) return;
+      clearTimeout(idleTimer);
+      $('tutorialOverlay').style.display = 'none';
+      demoOverlay.style.display = 'flex';
+
+      // 一時的なデモ用ステートを構築
+      state = createState();
+      state.isDemo = true;
+      state.game = buildGame(0);
+      state.mode = 'manager';
+      state.game.offense = 'away';
+      setCurrentDisplayedNames();
+      
+      addLog('【デモンストレーション開始】', 'special');
+      setNarration('DEMO PLAY', `自動対戦中です...`);
+      
+      renderAll();
+      demoStepTimer = setTimeout(runDemoStep, 500);
+    }
+
+    function stopDemo() {
+      if (!state.isDemo) return;
+      state.isDemo = false;
+      demoOverlay.style.display = 'none';
+      clearTimeout(demoStepTimer);
+      
+      state = createState();
+      showTitle();
+      
+      if (!localStorage.getItem('pmdx_tutorial_done')) {
+        setTimeout(showTutorial, 400);
+      }
+    }
+
+    function runDemoStep() {
+      if (!state.isDemo) return;
+      const g = state.game;
+      if (!g) { startDemo(); return; }
+
+      // 1回裏が終了して2回表に入ったか、ゲームが終わっていたらデモ再起動
+      if (g.inning > 1 || ['postgame', 'hero', 'ending', 'halftime'].includes(state.mode)) {
+        state.isDemo = false;
+        startDemo();
+        return;
+      }
+
+      if (state.mode === 'manager') {
+        if (g.offense === 'away') {
+          // 守備側（CPU采配）
+          if (g.bases[0] && chance(10)) resolvePitch('pickoff');
+          else if (chance(10)) resolvePitch('waste');
+          else resolvePitch('attack');
+        } else {
+          // 攻撃側（CPU采配）
+          if (chance(20)) resolveBat('power');
+          else if (chance(10)) resolveBat('take');
+          else if (g.outs < 2 && (g.bases[0] || g.bases[1]) && chance(20)) resolveBat('bunt');
+          else resolveBat('normal');
+        }
+      }
+
+      if (state.isDemo) {
+        els.headline.textContent = 'DEMO PLAY'; // ヘッダーを固定
+        demoStepTimer = setTimeout(runDemoStep, 4000);
+      }
+    }
 
     function exportJSON() {
       const dataStr = JSON.stringify({
@@ -1102,6 +1220,7 @@
       setNarration('監督室','青いユニフォームが並ぶロッカールーム。今日から、あなたがこのチームの監督です。選手を選び、サインを出し、ペナントレースを勝ち抜いて日本一を目指してください。');
       setActions([{label:'新シーズン開始',className:'gold',onClick:startSeason}], [{label:'ロード案内',onClick:()=>addLog('左の SAVE / LOAD から読込できます。')}]);
       renderAll();
+      resetIdleTimer();
     }
 
     function startSeason(){
@@ -1644,12 +1763,9 @@
       }
     }
 
-    showTitle();
+    // ゲーム起動（いきなりデモを開始する）
+    startDemo();
 
-    // チュートリアルの表示判定
-    if (!localStorage.getItem('pmdx_tutorial_done')) {
-      setTimeout(showTutorial, 400);
-    }
   })();
   </script>
 </body>
