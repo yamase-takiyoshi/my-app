@@ -5,151 +5,251 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pennant Manager DX Complete</title>
   <style>
-    :root{
-      --bg1:#16365c; --bg2:#0b1423; --bg3:#040912;
-      --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.05);
-      --text:#edf6ff; --muted:#9fb6cb; --blue:#7dcaff; --blue2:#dff3ff;
-      --gold:#ffd66c; --green:#88ecb1; --red:#ff9ca2; --orange:#ffb66c; --purple:#c8adff;
-      --ball:#61dd74; --strike:#ffd25f; --out:#ff6d6d;
-      --shadow:0 22px 54px rgba(0,0,0,.34);
+    :root {
+      /* Base Theme (Dark) Variables */
+      --bg1: #16365c; --bg2: #0b1423; --bg3: #040912;
+      --bg-radial1: rgba(98,172,255,.22);
+      --bg-radial2: rgba(255,214,108,.08);
+      --line: rgba(255,255,255,.08); --line2: rgba(255,255,255,.05);
+      --text: #edf6ff; --muted: #9fb6cb; --blue: #7dcaff; --blue2: #dff3ff;
+      --gold: #ffd66c; --green: #88ecb1; --red: #ff9ca2; --orange: #ffb66c; --purple: #c8adff;
+      --ball: #61dd74; --strike: #ffd25f; --out: #ff6d6d;
+      --shadow: 0 22px 54px rgba(0,0,0,.34);
+      
+      --card-bg: linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      --box-bg: linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      --hero-bg: linear-gradient(135deg,#173659,#214d7b 58%,#3a8fdb);
+      --scoreboard-bg: linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02)), linear-gradient(180deg,#15355a,#09121f);
+      --stage-bg: linear-gradient(180deg,rgba(8,14,25,.92),rgba(5,10,18,.98));
+      --pill-bg: rgba(255,255,255,.06);
+      --score-bg: linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
+      --narration-bg: linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));
+      --chip-bg: rgba(255,255,255,.05);
+      --trait-bg: linear-gradient(135deg, #4b3000, #2a1b00);
+      --base-bg: rgba(255,255,255,.08);
+      --base-border: rgba(255,255,255,.20);
+      --log-bg: rgba(255,255,255,.035);
+      --lamp-bg: #273241;
+      --btn-sec-bg: linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.05));
+      --team-label-color: #f6fbff;
+      --event-text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{height:100%}
-    body{
-      margin:0; padding:12px; color:var(--text);
-      font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",system-ui,sans-serif;
+
+    [data-theme="light"] {
+      --bg1: #e6f2ff; --bg2: #d0e6ff; --bg3: #b3d4ff;
+      --bg-radial1: rgba(0,100,255,.1);
+      --bg-radial2: rgba(255,150,0,.05);
+      --line: rgba(0,0,0,.12); --line2: rgba(0,0,0,.08);
+      --text: #112233; --muted: #556677; --blue: #0055aa; --blue2: #003366;
+      --gold: #b8860b; --green: #008000; --red: #cc0000; --orange: #d2691e; --purple: #800080;
+      
+      --shadow: 0 12px 30px rgba(0,0,0,.1);
+      --card-bg: linear-gradient(180deg,rgba(255,255,255,.85),rgba(255,255,255,.65));
+      --box-bg: linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.4));
+      --hero-bg: linear-gradient(135deg,#7dcaff,#3a8fdb 58%,#214d7b);
+      --scoreboard-bg: linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.5)), linear-gradient(180deg,#d0e6ff,#e6f2ff);
+      --stage-bg: linear-gradient(180deg,rgba(240,248,255,.8),rgba(220,235,250,.9));
+      --pill-bg: rgba(0,0,0,.05);
+      --score-bg: linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.01));
+      --narration-bg: linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.5));
+      --chip-bg: rgba(0,0,0,.05);
+      --trait-bg: linear-gradient(135deg, #fff3d6, #ffe4a0);
+      --base-bg: rgba(0,0,0,.05);
+      --base-border: rgba(0,0,0,.15);
+      --log-bg: rgba(0,0,0,.03);
+      --lamp-bg: #c0c8d0;
+      --btn-sec-bg: linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.02));
+      --team-label-color: #112233;
+      --event-text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    }
+
+    [data-theme="clear"] {
+      --bg1: #0f2027; --bg2: #203a43; --bg3: #2c5364;
+      --bg-radial1: rgba(0,255,255,.15);
+      --bg-radial2: rgba(255,0,255,.15);
+      --line: rgba(255,255,255,.15); --line2: rgba(255,255,255,.1);
+      --text: #ffffff; --muted: #a0b0c0; --blue: #66b2ff; --blue2: #99ccff;
+      --gold: #ffd700; --green: #50c878; --red: #ff4040; --orange: #ff8c00; --purple: #da70d6;
+      
+      --shadow: 0 8px 32px 0 rgba(0,0,0,0.37);
+      --card-bg: rgba(255,255,255,0.05);
+      --box-bg: rgba(255,255,255,0.05);
+      --hero-bg: rgba(255,255,255,0.1);
+      --scoreboard-bg: rgba(0,0,0,0.2);
+      --stage-bg: rgba(0,0,0,0.15);
+      --pill-bg: rgba(255,255,255,.1);
+      --score-bg: rgba(255,255,255,.1);
+      --narration-bg: rgba(255,255,255,.05);
+      --chip-bg: rgba(255,255,255,.1);
+      --trait-bg: rgba(255,215,0,0.15);
+      --base-bg: rgba(255,255,255,.1);
+      --base-border: rgba(255,255,255,.3);
+      --log-bg: rgba(255,255,255,.05);
+      --lamp-bg: rgba(255,255,255,.1);
+      --btn-sec-bg: rgba(255,255,255,.1);
+      --team-label-color: #ffffff;
+      --event-text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; padding: 12px; color: var(--text);
+      font-family: "Hiragino Sans","Yu Gothic UI","Meiryo",system-ui,sans-serif;
       background:
-        radial-gradient(circle at top, rgba(98,172,255,.22), transparent 22%),
-        radial-gradient(circle at left bottom, rgba(255,214,108,.08), transparent 20%),
-        linear-gradient(180deg,var(--bg1),var(--bg2) 42%,var(--bg3));
+        radial-gradient(circle at top, var(--bg-radial1), transparent 22%),
+        radial-gradient(circle at left bottom, var(--bg-radial2), transparent 20%),
+        linear-gradient(180deg, var(--bg1), var(--bg2) 42%, var(--bg3));
+      transition: background 0.3s, color 0.3s;
     }
-    .app{
-      width:min(1500px,100%); margin:0 auto; display:grid;
-      grid-template-columns:300px 1fr; gap:12px;
+    .app {
+      width: min(1500px, 100%); margin: 0 auto; display: grid;
+      grid-template-columns: 300px 1fr; gap: 12px;
     }
-    .card{
-      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
-      border:1px solid var(--line); border-radius:22px;
-      box-shadow:var(--shadow); backdrop-filter:blur(10px);
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--line); border-radius: 22px;
+      box-shadow: var(--shadow); backdrop-filter: blur(10px);
     }
-    .sidebar,.main{ padding:14px; display:flex; flex-direction:column; gap:12px; }
-    .hero{
-      padding:18px; border-radius:18px;
-      background:linear-gradient(135deg,#173659,#214d7b 58%,#3a8fdb);
-      border:1px solid rgba(255,255,255,.12); position:relative; overflow:hidden;
+    .sidebar, .main { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+    .hero {
+      padding: 18px; border-radius: 18px;
+      background: var(--hero-bg);
+      border: 1px solid rgba(255,255,255,.12); position: relative; overflow: hidden;
     }
-    .hero::after{
-      content:""; position:absolute; right:-30px; top:-30px; width:180px; height:180px;
-      border-radius:50%; background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%);
-      pointer-events:none;
+    .hero::after {
+      content: ""; position: absolute; right: -30px; top: -30px; width: 180px; height: 180px;
+      border-radius: 50%; background: radial-gradient(circle,rgba(255,255,255,.18),transparent 70%);
+      pointer-events: none;
     }
-    .logo{ font-size:30px; font-weight:900; line-height:1.02; letter-spacing:.04em; }
-    .logo span{color:var(--blue2)}
-    .sub{ margin-top:8px; font-size:12px; line-height:1.75; color:rgba(235,246,255,.82); }
-    .box,.panel,.stage{
-      padding:13px; border-radius:18px;
-      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
-      border:1px solid var(--line2);
+    .logo { font-size: 30px; font-weight: 900; line-height: 1.02; letter-spacing: .04em; }
+    .logo span { color: var(--blue2); }
+    .sub { margin-top: 8px; font-size: 12px; line-height: 1.75; color: rgba(235,246,255,.82); }
+    .box, .panel, .stage {
+      padding: 13px; border-radius: 18px;
+      background: var(--box-bg);
+      border: 1px solid var(--line2);
     }
-    .title{
-      font-size:12px; letter-spacing:.12em; text-transform:uppercase;
-      color:var(--blue2); font-weight:900; margin-bottom:8px;
+    .title {
+      font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--blue2); font-weight: 900; margin-bottom: 8px;
     }
-    .scoreboard{
-      padding:12px 14px; border-radius:18px;
-      background: linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02)), linear-gradient(180deg,#15355a,#09121f);
-      border:1px solid rgba(255,255,255,.10);
-      display:grid; grid-template-columns:1fr auto auto auto auto auto auto; align-items:center; gap:8px;
+    .scoreboard {
+      padding: 12px 14px; border-radius: 18px;
+      background: var(--scoreboard-bg);
+      border: 1px solid var(--line);
+      display: grid; grid-template-columns: 1fr auto auto auto auto auto auto; align-items: center; gap: 8px;
     }
-    .team-label{ font-weight:900; font-size:15px; color:#f6fbff; letter-spacing:.03em; }
-    .pill,.score-big{ border-radius:999px; border:1px solid rgba(255,255,255,.08); white-space:nowrap; }
-    .pill{ padding:6px 10px; font-size:12px; color:var(--muted); background:rgba(255,255,255,.06); }
-    .score-big{
-      padding:5px 0; min-width:54px; text-align:center; font-size:29px; font-weight:900;
-      color:var(--gold); background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
+    .team-label { font-weight: 900; font-size: 15px; color: var(--team-label-color); letter-spacing: .03em; }
+    .pill, .score-big { border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; }
+    .pill { padding: 6px 10px; font-size: 12px; color: var(--muted); background: var(--pill-bg); }
+    .score-big {
+      padding: 5px 0; min-width: 54px; text-align: center; font-size: 29px; font-weight: 900;
+      color: var(--gold); background: var(--score-bg);
     }
-    .top-panels,.game-layout{ display:grid; gap:12px; }
-    .top-panels{grid-template-columns:1.18fr .82fr}
-    .game-layout{grid-template-columns:1.03fr .97fr}
-    .stage{ min-height:520px; background:linear-gradient(180deg,rgba(8,14,25,.92),rgba(5,10,18,.98)); display:flex; flex-direction:column; }
-    .headline{ font-size:20px; font-weight:900; color:var(--blue2); margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; }
-    .event-badge{ font-size:11px; padding:3px 8px; border-radius:4px; background:var(--gold); color:#000; font-weight:bold; letter-spacing:0.05em; }
-    .narration{
-      padding:14px; border-radius:16px; border:1px solid var(--line);
-      background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));
-      line-height:1.85; min-height:160px; white-space:pre-wrap; flex-grow: 1; overflow-y:auto;
+    .top-panels, .game-layout { display: grid; gap: 12px; }
+    .top-panels { grid-template-columns: 1.18fr .82fr; }
+    .game-layout { grid-template-columns: 1.03fr .97fr; }
+    .stage { min-height: 520px; background: var(--stage-bg); display: flex; flex-direction: column; }
+    .headline { font-size: 20px; font-weight: 900; color: var(--blue2); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+    .event-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; background: var(--gold); color: #000; font-weight: bold; letter-spacing: 0.05em; }
+    .narration {
+      padding: 14px; border-radius: 16px; border: 1px solid var(--line);
+      background: var(--narration-bg);
+      line-height: 1.85; min-height: 160px; white-space: pre-wrap; flex-grow: 1; overflow-y: auto;
     }
     .event-narration {
       text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center;
-      font-size: 16px; font-weight: bold; color: var(--gold); text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      font-size: 16px; font-weight: bold; color: var(--gold); text-shadow: var(--event-text-shadow);
     }
-    .mini-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
-    .chip{
-      padding:7px 10px; border-radius:999px; background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.06); font-size:12px; color:var(--muted);
+    .mini-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .chip {
+      padding: 7px 10px; border-radius: 999px; background: var(--chip-bg);
+      border: 1px solid var(--line); font-size: 12px; color: var(--muted);
     }
-    .trait-chip{ background:linear-gradient(135deg, #4b3000, #2a1b00); border-color:var(--gold); color:var(--gold); }
-    .actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
-    .actions.secondary{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
-    button{
-      appearance:none; border:none; border-radius:12px; padding:11px 14px;
-      font-size:14px; font-weight:900; cursor:pointer; color:#082031;
-      background:linear-gradient(180deg,#aee5ff,#72c9ff);
-      box-shadow:0 8px 20px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.22);
+    .trait-chip { background: var(--trait-bg); border-color: var(--gold); color: var(--gold); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .actions.secondary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    button {
+      appearance: none; border: none; border-radius: 12px; padding: 11px 14px;
+      font-size: 14px; font-weight: 900; cursor: pointer; color: #082031;
+      background: linear-gradient(180deg,#aee5ff,#72c9ff);
+      box-shadow: 0 8px 20px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.22);
+      transition: opacity 0.2s;
     }
-    button.secondary{ background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.05)); border:1px solid rgba(255,255,255,.08); color:var(--text); }
-    button.gold{background:linear-gradient(180deg,#ffe6a2,#ffd66c)}
-    button.green{background:linear-gradient(180deg,#bcf2cf,#88ecb1)}
-    button.red{background:linear-gradient(180deg,#ffbdc2,#ff9198)}
-    button.purple{background:linear-gradient(180deg,#e4d6ff,#c8adff)}
-    button.orange{background:linear-gradient(180deg,#ffd6a8,#ffb66c)}
-    button:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
-    .fieldWrap{display:grid;gap:10px}
-    .diamond{ width:150px; height:150px; margin:0 auto; position:relative; }
-    .base{ width:22px; height:22px; border-radius:4px; transform:rotate(45deg); position:absolute; background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.20); }
-    .base.active{ background:rgba(255,214,108,.95); box-shadow:0 0 14px rgba(255,214,108,.45); }
-    .base.home{left:64px;bottom:0} .base.first{right:0;top:64px} .base.second{left:64px;top:0} .base.third{left:0;top:64px}
-    .diamond-label{ position:absolute; font-size:11px; color:var(--muted); }
-    .l1{right:-10px;top:88px} .l2{left:66px;top:-16px} .l3{left:-10px;top:88px} .lh{left:56px;bottom:-20px}
-    .row{ display:grid; grid-template-columns:1fr auto; gap:8px; font-size:13px; align-items:center; }
-    .mini-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
-    .smallbox,.player-card,.save-slot{
-      padding:10px; border-radius:14px; border:1px solid rgba(255,255,255,.06);
-      background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));
+    button:active { opacity: 0.8; }
+    button.secondary { background: var(--btn-sec-bg); border: 1px solid var(--line); color: var(--text); }
+    button.gold { background: linear-gradient(180deg,#ffe6a2,#ffd66c); }
+    button.green { background: linear-gradient(180deg,#bcf2cf,#88ecb1); }
+    button.red { background: linear-gradient(180deg,#ffbdc2,#ff9198); color: #fff; }
+    button.purple { background: linear-gradient(180deg,#e4d6ff,#c8adff); }
+    button.orange { background: linear-gradient(180deg,#ffd6a8,#ffb66c); }
+    button:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+    .fieldWrap { display: grid; gap: 10px; }
+    .diamond { width: 150px; height: 150px; margin: 0 auto; position: relative; }
+    .base {
+      width: 22px; height: 22px; border-radius: 4px; transform: rotate(45deg); position: absolute;
+      background: var(--base-bg); border: 2px solid var(--base-border);
     }
-    .player-name{font-weight:900;margin-bottom:4px;display:flex;justify-content:space-between;}
-    .trait-tag { font-size:10px; color:var(--gold); border:1px solid var(--gold); padding:1px 4px; border-radius:4px;}
-    .tiny{font-size:12px;color:var(--muted);line-height:1.6}
-    .inning-board{ display:grid; grid-template-columns:repeat(9,1fr); gap:4px; }
-    .inning-cell{ padding:6px 4px; text-align:center; font-size:12px; border-radius:8px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.04); }
-    .log{ height:380px; overflow:auto; display:flex; flex-direction:column; gap:8px; }
-    .log-line{ padding:9px 10px; border-radius:12px; background:rgba(255,255,255,.035); font-size:13px; line-height:1.6; }
-    .good{border-left:3px solid var(--green)} .bad{border-left:3px solid var(--red)}
-    .em{border-left:3px solid var(--gold)} .special{border-left:3px solid var(--purple)}
-    .save-grid,.standings,.bench-list{display:grid;gap:8px}
-    .slot-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-    .tvline{
-      display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 12px;
-      border-radius:16px; background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015)); border:1px solid var(--line);
+    .base.active { background: rgba(255,214,108,.95); box-shadow: 0 0 14px rgba(255,214,108,.45); }
+    .base.home { left: 64px; bottom: 0; } .base.first { right: 0; top: 64px; } .base.second { left: 64px; top: 0; } .base.third { left: 0; top: 64px; }
+    .diamond-label { position: absolute; font-size: 11px; color: var(--muted); }
+    .l1 { right: -10px; top: 88px; } .l2 { left: 66px; top: -16px; } .l3 { left: -10px; top: 88px; } .lh { left: 56px; bottom: -20px; }
+    .row { display: grid; grid-template-columns: 1fr auto; gap: 8px; font-size: 13px; align-items: center; }
+    .mini-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .smallbox, .player-card, .save-slot {
+      padding: 10px; border-radius: 14px; border: 1px solid var(--line);
+      background: var(--box-bg);
     }
-    .tvlabel{ font-size:12px; color:var(--blue2); font-weight:900; letter-spacing:.12em; }
-    .countWrap{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
-    .group{ display:flex; align-items:center; gap:6px; }
-    .group span{ font-size:12px; color:var(--muted); font-weight:900; width:16px; }
-    .lamp{ width:14px; height:14px; border-radius:50%; background:#273241; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 1px 3px rgba(0,0,0,.35); }
-    .lamp.ball.on{background:var(--ball);box-shadow:0 0 12px rgba(97,221,116,.6)}
-    .lamp.strike.on{background:var(--strike);box-shadow:0 0 12px rgba(255,210,95,.6)}
-    .lamp.out.on{background:var(--out);box-shadow:0 0 12px rgba(255,109,109,.6)}
+    .player-name { font-weight: 900; margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .trait-tag { font-size: 10px; color: var(--gold); border: 1px solid var(--gold); padding: 1px 4px; border-radius: 4px; }
+    .tiny { font-size: 12px; color: var(--muted); line-height: 1.6; }
+    .inning-board { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; }
+    .inning-cell {
+      padding: 6px 4px; text-align: center; font-size: 12px; border-radius: 8px;
+      background: var(--pill-bg); border: 1px solid var(--pill-bg);
+    }
+    .log { height: 380px; overflow: auto; display: flex; flex-direction: column; gap: 8px; }
+    .log-line { padding: 9px 10px; border-radius: 12px; background: var(--log-bg); font-size: 13px; line-height: 1.6; }
+    .good { border-left: 3px solid var(--green); } .bad { border-left: 3px solid var(--red); }
+    .em { border-left: 3px solid var(--gold); } .special { border-left: 3px solid var(--purple); }
+    .save-grid, .standings, .bench-list { display: grid; gap: 8px; }
+    .slot-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .tvline {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px;
+      border-radius: 16px; background: var(--narration-bg); border: 1px solid var(--line);
+    }
+    .tvlabel { font-size: 12px; color: var(--blue2); font-weight: 900; letter-spacing: .12em; }
+    .countWrap { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+    .group { display: flex; align-items: center; gap: 6px; }
+    .group span { font-size: 12px; color: var(--muted); font-weight: 900; width: 16px; }
+    .lamp {
+      width: 14px; height: 14px; border-radius: 50%; background: var(--lamp-bg);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), 0 1px 3px rgba(0,0,0,.35);
+    }
+    .lamp.ball.on { background: var(--ball); box-shadow: 0 0 12px rgba(97,221,116,.6); }
+    .lamp.strike.on { background: var(--strike); box-shadow: 0 0 12px rgba(255,210,95,.6); }
+    .lamp.out.on { background: var(--out); box-shadow: 0 0 12px rgba(255,109,109,.6); }
     
     .credits-container { height: 160px; overflow: hidden; position: relative; }
     .credits-scroll { position: absolute; width: 100%; text-align: center; animation: scrollUp 15s linear forwards; }
     @keyframes scrollUp { 0% { top: 160px; } 100% { top: -400px; } }
 
-    @media (max-width:1180px){ .app,.top-panels,.game-layout{grid-template-columns:1fr} }
-    @media (max-width:760px){
-      body{padding:8px} .scoreboard{grid-template-columns:1fr auto auto}
-      .actions.secondary{grid-template-columns:1fr} .mini-grid{grid-template-columns:1fr}
-      .slot-actions button,.actions button{width:100%}
+    /* Custom Select Style */
+    .styled-select {
+      width: 100%; padding: 11px 14px; border-radius: 12px;
+      background: var(--btn-sec-bg); color: var(--text);
+      border: 1px solid var(--line); font-size: 14px;
+      font-family: inherit; font-weight: 900; outline: none; cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+    }
+    .styled-select option { background: var(--bg2); color: var(--text); }
+
+    @media (max-width: 1180px) { .app, .top-panels, .game-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) {
+      body { padding: 8px; } .scoreboard { grid-template-columns: 1fr auto auto; }
+      .actions.secondary { grid-template-columns: 1fr; } .mini-grid { grid-template-columns: 1fr; }
+      .slot-actions button, .actions button { width: 100%; }
     }
   </style>
 </head>
@@ -160,6 +260,20 @@
         <div class="logo">PENNANT<br><span>MANAGER DX</span></div>
         <div class="sub">監督としてサインを出し、カウントを読み、投手のスタミナや守備力、選手の「特性」を見極めて日本一を目指す本格監督ゲーム。</div>
       </section>
+      
+      <section class="box">
+        <div class="title">System / Theme</div>
+        <div class="save-grid">
+          <select id="themeSelect" class="styled-select">
+            <option value="system">システムデフォルト</option>
+            <option value="dark">ダークテーマ</option>
+            <option value="light">ライトテーマ</option>
+            <option value="clear">クリアーテーマ</option>
+          </select>
+          <button class="red" id="btnReset" style="width:100%">データをリセット</button>
+        </div>
+      </section>
+
       <section class="box">
         <div class="title">League Standing</div>
         <div class="standings" id="standingsBox"></div>
@@ -219,14 +333,14 @@
               <div class="diamond-label l1">1B</div>
               <div class="diamond-label l2">2B</div>
               <div class="diamond-label l3">3B</div>
-            <div class="diamond-label lh">HOME</div>
-          </div>
-          <div class="row"><span>攻撃チーム</span><strong id="offenseTeam">-</strong></div>
-          <div class="row" style="align-items: start;"><span>打者</span><div style="text-align: right;"><strong id="batterName">-</strong><div id="batterStats" style="font-size: 10px; color: var(--muted); margin-top: 2px;"></div></div></div>
-          <div class="row" style="align-items: start;"><span>投手</span><div style="text-align: right;"><strong id="pitcherName">-</strong><div id="pitcherStats" style="font-size: 10px; color: var(--muted); margin-top: 2px;"></div></div></div>
-          <div class="row"><span>カウント</span><strong id="countText">-</strong></div>
-          <div class="mini-grid">
-            <div class="smallbox">
+              <div class="diamond-label lh">HOME</div>
+            </div>
+            <div class="row"><span>攻撃チーム</span><strong id="offenseTeam">-</strong></div>
+            <div class="row" style="align-items: start;"><span>打者</span><div style="text-align: right;"><strong id="batterName">-</strong><div id="batterStats" style="font-size: 10px; color: var(--muted); margin-top: 2px;"></div></div></div>
+            <div class="row" style="align-items: start;"><span>投手</span><div style="text-align: right;"><strong id="pitcherName">-</strong><div id="pitcherStats" style="font-size: 10px; color: var(--muted); margin-top: 2px;"></div></div></div>
+            <div class="row"><span>カウント</span><strong id="countText">-</strong></div>
+            <div class="mini-grid">
+              <div class="smallbox">
                 <div class="player-name">守備力影響</div>
                 <div class="tiny" id="defenseHint">-</div>
               </div>
@@ -255,6 +369,45 @@
 
   <script>
   (() => {
+    // ---- THEME & SYSTEM ----
+    const themeSelect = document.getElementById('themeSelect');
+    const savedTheme = localStorage.getItem('pmdx_theme') || 'system';
+    themeSelect.value = savedTheme;
+
+    function applyTheme(theme) {
+      if (theme === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+    }
+
+    themeSelect.addEventListener('change', (e) => {
+      const newTheme = e.target.value;
+      localStorage.setItem('pmdx_theme', newTheme);
+      applyTheme(newTheme);
+    });
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if (localStorage.getItem('pmdx_theme') === 'system' || !localStorage.getItem('pmdx_theme')) {
+        applyTheme('system');
+      }
+    });
+    applyTheme(savedTheme);
+
+    document.getElementById('btnReset').addEventListener('click', function() {
+      if(this.textContent === 'データをリセット') {
+        this.textContent = '本当にリセット？(確認)';
+        setTimeout(() => { if(this.textContent === '本当にリセット？(確認)') this.textContent = 'データをリセット'; }, 3000);
+      } else {
+        state = createState();
+        showTitle();
+        addLog('ゲームデータを初期化しました。', 'special');
+        this.textContent = 'データをリセット';
+      }
+    });
+
     // ---- AUDIO SYSTEM (Web Audio API Synthesizer) ----
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = new AudioContext();
@@ -336,7 +489,6 @@
 
     // ---- GAME LOGIC ----
     const LEAGUE_TEAMS = ['TOKYO BLUE STARS','OSAKA TIGERS','NAGOYA COMETS','YOKOHAMA WAVES','FUKUOKA PHOENIX','SENDAI NORTHERNS'];
-    // 5節で一巡する対戦カードパターン（0は常に自チーム）
     const MATCH_PATTERNS = [
       [[0,1], [2,3], [4,5]],
       [[0,2], [1,4], [3,5]],
@@ -426,7 +578,7 @@
         standings: LEAGUE_TEAMS.map(name => ({name,w:0,l:0})), record:{w:0,l:0},
         logs:[{text:'Pennant Manager DX へようこそ。',type:'em'}],
         roster:{ hitters:createHomeHitters(), pitchers:createHomePitchers() },
-        game:null
+        game:null, gameBackup:null
       };
     }
 
@@ -444,7 +596,6 @@
       const awayStarterIndex = state.scheduleIndex % 3;
       state.roster.pitchers[starterIndex].restDays = 4;
 
-      // 他球場の試合データ
       const otherMatches = [
         { home: LEAGUE_TEAMS[todaysMatches[1][0]], away: LEAGUE_TEAMS[todaysMatches[1][1]], homeScore: 0, awayScore: 0, inning: 1 },
         { home: LEAGUE_TEAMS[todaysMatches[2][0]], away: LEAGUE_TEAMS[todaysMatches[2][1]], homeScore: 0, awayScore: 0, inning: 1 }
@@ -529,16 +680,20 @@
     }
 
     function clearCount(){ state.game.balls = 0; state.game.strikes = 0; }
+    
     function markInningIfNeeded(){
       const g = state.game; const idx = g.inning - 1;
-      if(g.inningRuns.home[idx] === '-') g.inningRuns.home[idx] = 0;
-      if(g.inningRuns.away[idx] === '-') g.inningRuns.away[idx] = 0;
+      if(idx < 9) {
+        if(g.inningRuns.home[idx] === '-') g.inningRuns.home[idx] = 0;
+        if(g.inningRuns.away[idx] === '-') g.inningRuns.away[idx] = 0;
+      }
     }
 
     function addRun(side,runs=1){
       const g = state.game; markInningIfNeeded();
-      if(side === 'home'){ g.homeScore += runs; g.inningRuns.home[g.inning-1] = Number(g.inningRuns.home[g.inning-1]) + runs; }
-      else{ g.awayScore += runs; g.inningRuns.away[g.inning-1] = Number(g.inningRuns.away[g.inning-1]) + runs; }
+      const idx = g.inning - 1;
+      if(side === 'home'){ g.homeScore += runs; if(idx < 9) g.inningRuns.home[idx] = Number(g.inningRuns.home[idx]) + runs; }
+      else{ g.awayScore += runs; if(idx < 9) g.inningRuns.away[idx] = Number(g.inningRuns.away[idx]) + runs; }
     }
 
     function getBaseText(){
@@ -625,7 +780,6 @@
       return false;
     }
 
-    // 他球場のイニング進行・得点処理
     function updateOtherMatches(half){
       const g = state.game;
       if(!g || !g.otherMatches) return;
@@ -644,11 +798,7 @@
 
       if(g.half === 'top'){
         updateOtherMatches('top');
-
-        if(g.inning >= 9 && g.homeScore > g.awayScore) {
-          finishGame();
-          return;
-        }
+        if(g.inning >= 9 && g.homeScore > g.awayScore) { finishGame(); return; }
 
         g.half = 'bottom'; g.offense = 'home'; g.outs = 0; clearCount(); g.bases = [null,null,null]; g.pitchType = '-'; g.selectedPitch = null;
         setCurrentDisplayedNames();
@@ -657,12 +807,9 @@
       } else {
         updateOtherMatches('bottom');
 
-        // 他球場の途中経過速報
         if(g.inning === 3 || g.inning === 6) {
           let msg = `【他球場速報 ${g.inning}回終了】\n`;
-          g.otherMatches.forEach(m => {
-            msg += `${m.home} ${m.homeScore} - ${m.awayScore} ${m.away} | `;
-          });
+          g.otherMatches.forEach(m => { msg += `${m.home} ${m.homeScore} - ${m.awayScore} ${m.away} | `; });
           addLog(msg, 'special');
         }
 
@@ -681,6 +828,30 @@
         showDefenseActions();
       }
       renderAll();
+    }
+
+    function saveBackup() {
+      const temp = state.gameBackup;
+      state.gameBackup = null;
+      state.gameBackup = JSON.stringify(state);
+    }
+
+    // --- GAME RESTART FEATURE ---
+    function confirmRestartGame(e) {
+      if(e.target.textContent === '1試合クリアー') {
+        e.target.textContent = '本当にやり直す？';
+        setTimeout(() => { if(e.target && e.target.textContent === '本当にやり直す？') e.target.textContent = '1試合クリアー'; }, 2000);
+      } else {
+        restartCurrentGame();
+      }
+    }
+
+    function restartCurrentGame() {
+      if (state.gameBackup) {
+        state = JSON.parse(state.gameBackup);
+        addLog('試合をリセットし、最初からやり直します。', 'special');
+        restoreView();
+      }
     }
 
     // ---- RENDERING ----
@@ -837,12 +1008,13 @@
     }
 
     function prepareNextGame(){
-      // ★ペナント中盤でオールスターを一度だけ発火
       if(state.seasonType === 'regular' && !state.allStarDone && state.scheduleIndex === Math.floor(state.seasonLen / 2)){
         state.allStarDone = true;
         startAllStar();
         return;
       }
+
+      saveBackup();
 
       state.mode = 'select_starter';
       const round = state.scheduleIndex % 5;
@@ -917,6 +1089,7 @@
     }
 
     function startAllStar(){
+      saveBackup();
       state.seasonType = 'allstar';
       state.mode = 'event';
       setNarration('オールスター戦',
@@ -942,6 +1115,7 @@
     }
 
     function startClimax(){
+      saveBackup();
       state.seasonType = 'climax';
       state.mode = 'event';
       setNarration('クライマックスシリーズ',
@@ -966,6 +1140,7 @@
     }
 
     function startJapanSeries(){
+      saveBackup();
       state.seasonType = 'series';
       state.mode = 'event';
       setNarration('日本シリーズ',
@@ -1016,7 +1191,7 @@
         [{label:'勝負',className:'gold',onClick:()=>resolvePitch('attack')}, {label:'一球外す',className:'orange',onClick:()=>resolvePitch('waste')},
          {label:'申告敬遠',className:'purple',onClick:()=>resolvePitch('ibb')}, {label:'牽制',className:'secondary',onClick:()=>resolvePitch('pickoff')}],
         [{label:'AUTO/指定切替',onClick:toggleMode}, {label:'球種指定',className:'purple',onClick:pickPitch,disabled:state.game.pitchMode!=='manual'},
-         {label:'継投',onClick:changePitcherMenu}, {label:'保存(JSON)',className:'green',onClick:exportJSON}]
+         {label:'継投',onClick:changePitcherMenu}, {label:'1試合クリアー',className:'red',onClick:confirmRestartGame}]
       );
     }
 
@@ -1024,7 +1199,7 @@
       setActions(
         [{label:'打たせる',className:'gold',onClick:()=>resolveBat('normal')}, {label:'強振',className:'orange',onClick:()=>resolveBat('power')},
          {label:'バント',className:'secondary',onClick:()=>resolveBat('bunt')}, {label:'一球見送り',className:'secondary',onClick:()=>resolveBat('take')}],
-        [{label:'代打',onClick:showPinchHitterMenu}, {label:'盗塁',className:'purple',onClick:stealAttempt}, {label:'次打者へ',onClick:forceAdvanceBatter}, {label:'保存(JSON)',className:'green',onClick:exportJSON}]
+        [{label:'代打',onClick:showPinchHitterMenu}, {label:'盗塁',className:'purple',onClick:stealAttempt}, {label:'次打者へ',onClick:forceAdvanceBatter}, {label:'1試合クリアー',className:'red',onClick:confirmRestartGame}]
       );
     }
 
@@ -1248,7 +1423,6 @@
     }
 
     function forceAdvanceBatter(){
-      // デバッグ/詰まり防止用
       if(state.game.offense === 'home') advanceHomeBatter(); else advanceAwayBatter();
       clearCount();
       addLog('次打者へ進めました。','em');
@@ -1267,7 +1441,6 @@
       else if(win){ state.record.w++; if(my) my.w++; if(opp) opp.l++; currentHomePitcher().stats.w++; addLog(`勝利。`,'good'); }
       else { state.record.l++; if(my) my.l++; if(opp) opp.w++; currentHomePitcher().stats.l++; addLog(`敗北。`,'bad'); }
 
-      // 他球場の試合を最後までシミュレートして結果を確定
       let otherResultsText = '【他球場 最終結果】<br>';
       if(g.otherMatches) {
         g.otherMatches.forEach(m => {
@@ -1306,7 +1479,6 @@
     }
 
     function nextGame(){
-      // 通常シーズン
       if(state.seasonType === 'regular'){
         state.scheduleIndex++;
         reducePitcherRestDays();
@@ -1318,26 +1490,22 @@
         return;
       }
 
-      // オールスター後は同じ scheduleIndex のままペナント後半へ戻る
       if(state.seasonType === 'allstar'){
         state.seasonType = 'regular';
         prepareNextGame();
         return;
       }
 
-      // クライマックスを勝ち抜いたら日本シリーズへ
       if(state.seasonType === 'climax'){
         startJapanSeries();
         return;
       }
 
-      // 日本シリーズ後はエンディング
       if(state.seasonType === 'series'){
         showEnding();
         return;
       }
 
-      // 旧データ互換
       state.seasonType = 'regular';
       prepareNextGame();
     }
