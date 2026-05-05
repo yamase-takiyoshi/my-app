@@ -422,6 +422,7 @@
     function createState(){
       return {
         mode:'title', scheduleIndex:0, seasonLen:12,
+        seasonType:'regular', allStarDone:false,
         standings: LEAGUE_TEAMS.map(name => ({name,w:0,l:0})), record:{w:0,l:0},
         logs:[{text:'Pennant Manager DX へようこそ。',type:'em'}],
         roster:{ hitters:createHomeHitters(), pitchers:createHomePitchers() },
@@ -731,7 +732,7 @@
       els.inningPill.textContent = g ? `${g.inning}回${g.half === 'top' ? '表' : '裏'}` : '-';
       els.homeScore.textContent = g ? g.homeScore : '0'; els.awayScore.textContent = g ? g.awayScore : '0';
       
-      const isEvent = ['ceremony', 'halftime', 'hero', 'ending', 'select_starter'].includes(state.mode);
+      const isEvent = ['event', 'ceremony', 'halftime', 'hero', 'ending', 'select_starter'].includes(state.mode);
       els.tvline.style.display = isEvent ? 'none' : 'flex';
       els.miniRow.style.display = isEvent ? 'none' : 'flex';
       els.eventBadge.style.display = isEvent ? 'inline-block' : 'none';
@@ -829,16 +830,33 @@
 
     function startSeason(){
       state.scheduleIndex = 0; state.record = {w:0,l:0}; state.standings = LEAGUE_TEAMS.map(name => ({name,w:0,l:0}));
+      state.seasonType = 'regular'; state.allStarDone = false;
       state.logs = [{text:'新しいシーズンが始まった。',type:'em'}];
       state.roster = { hitters:createHomeHitters(), pitchers:createHomePitchers() };
       prepareNextGame();
     }
 
     function prepareNextGame(){
+      // ★ペナント中盤でオールスターを一度だけ発火
+      if(state.seasonType === 'regular' && !state.allStarDone && state.scheduleIndex === Math.floor(state.seasonLen / 2)){
+        state.allStarDone = true;
+        startAllStar();
+        return;
+      }
+
       state.mode = 'select_starter';
       const round = state.scheduleIndex % 5;
       const awayTeam = LEAGUE_TEAMS[MATCH_PATTERNS[round][0][1]];
-      setNarration('先発投手選択',`第${state.scheduleIndex+1}戦。相手は ${awayTeam}。\n本日の先発投手を選んでください。\n（先発登板後は中3日の休養が必要です）`);
+      const gameLabel = state.seasonType === 'regular'
+        ? `第${state.scheduleIndex+1}戦`
+        : state.seasonType === 'climax'
+          ? 'クライマックスシリーズ'
+          : state.seasonType === 'series'
+            ? '日本シリーズ'
+            : '特別試合';
+      setNarration('先発投手選択',`${gameLabel}。相手は ${awayTeam}。
+本日の先発投手を選んでください。
+（先発登板後は中3日の休養が必要です）`);
       
       const primaryActions = state.roster.pitchers.map((p, i) => {
         const isResting = p.restDays > 0;
@@ -895,6 +913,80 @@
 
       setNarration('ヒーローインタビュー',`今日のヒーローは ${mvp} 選手です！<br>「熱いご声援ありがとうございます！」<br><br>${otherResultsText}`);
       setActions([{label:'次の試合へ',className:'gold',onClick:nextGame}],[]);
+      renderAll();
+    }
+
+    function startAllStar(){
+      state.seasonType = 'allstar';
+      state.mode = 'event';
+      setNarration('オールスター戦',
+        'ファン投票で選ばれたスター選手たちによる夢の祭典！<br>特別な一戦が始まります。<br><br>勝敗はペナント成績には加算されません。'
+      );
+      setActions([
+        {
+          label:'プレイボール！',
+          className:'gold',
+          onClick:()=>{
+            state.game = buildGame(0);
+            state.mode = 'manager';
+            setCurrentDisplayedNames();
+            playMelody(JINGLES.playball);
+            addLog('オールスターゲーム開幕！','special');
+            setNarration('オールスター戦',`夢の球宴が始まりました。相手打者は ${state.game.batter}。`);
+            showDefenseActions();
+            renderAll();
+          }
+        }
+      ], [{label:'保存(JSON)',className:'green',onClick:exportJSON}]);
+      renderAll();
+    }
+
+    function startClimax(){
+      state.seasonType = 'climax';
+      state.mode = 'event';
+      setNarration('クライマックスシリーズ',
+        '短期決戦トーナメント開幕。<br>負ければ即終了、勝てば日本シリーズへ。<br><br>ペナントを勝ち抜いた先の緊張感が、球場全体を包みます。'
+      );
+      setActions([
+        {
+          label:'第1戦へ',
+          className:'gold',
+          onClick:()=>{
+            state.game = buildGame(0);
+            state.mode = 'manager';
+            setCurrentDisplayedNames();
+            addLog('クライマックスシリーズ開始！','special');
+            setNarration('クライマックスシリーズ',`短期決戦の第1球。相手打者は ${state.game.batter}。`);
+            showDefenseActions();
+            renderAll();
+          }
+        }
+      ], [{label:'保存(JSON)',className:'green',onClick:exportJSON}]);
+      renderAll();
+    }
+
+    function startJapanSeries(){
+      state.seasonType = 'series';
+      state.mode = 'event';
+      setNarration('日本シリーズ',
+        'ついに日本一決定戦。<br>ここに勝てば頂点です。<br><br>一年のすべてを、この大舞台にぶつけます。'
+      );
+      setActions([
+        {
+          label:'第1戦へ',
+          className:'gold',
+          onClick:()=>{
+            state.game = buildGame(0);
+            state.mode = 'manager';
+            setCurrentDisplayedNames();
+            addLog('日本シリーズ開幕！','special');
+            playMelody(JINGLES.playball);
+            setNarration('日本シリーズ',`日本一をかけた大一番。相手打者は ${state.game.batter}。`);
+            showDefenseActions();
+            renderAll();
+          }
+        }
+      ], [{label:'保存(JSON)',className:'green',onClick:exportJSON}]);
       renderAll();
     }
 
@@ -1045,122 +1137,134 @@
         if(g.outs >= 3) nextHalf(); else { setNarration('守備采配',`相手打者は ${g.batter}。`); showDefenseActions(); } renderAll(); return;
       }
 
-      g.pitchType = (g.pitchMode === 'manual' && g.selectedPitch) ? g.selectedPitch : chooseAutoPitch(); usePitcherStamina(4);
-      
-      let stuff = pitcher.stuff + Math.floor(g.pitcherStamina / 8);
-      let control = pitcher.control + Math.floor(g.pitcherStamina / 10);
-      
-      if(pitcher.traits.includes('エース') && g.inning <= 3) { stuff += 10; control += 10; }
-      if(pitcher.traits.includes('クローザー') && g.inning >= 9 && g.homeScore > g.awayScore) { stuff += 15; control += 15; }
-
-      let batterPower = batter.power;
-      let batterContact = batter.contact;
-      if(batter.traits.includes('ホームランバッター')) { batterPower += 15; batterContact -= 5; }
-      if(batter.traits.includes('代打の切り札') && g.inning >= 7) { batterPower += 15; batterContact += 15; }
-
-      const batterSkill = batterContact + batterPower * 0.4;
+      // attack
+      g.pitchType = g.pitchMode === 'manual' && g.selectedPitch ? g.selectedPitch : chooseAutoPitch();
+      usePitcherStamina(3);
       maybeAutoStealForAway();
-      const roll = randi(1,100) + Math.floor((batterSkill - stuff) / 2);
+      const staminaPenalty = getCurrentPitcherStamina() < 30 ? 8 : getCurrentPitcherStamina() < 50 ? 4 : 0;
+      let hitChance = 26 + (batter.contact - 60)*0.25 + (batter.power - 60)*0.08 - (pitcher.stuff - 65)*0.22 + staminaPenalty;
+      if(pitcher.traits.includes('エース')) hitChance -= 3;
+      if(batter.traits.includes('ホームランバッター')) hitChance += 1.5;
+      if(g.defense >= 75) hitChance -= 2;
+      hitChance = Math.max(12, Math.min(42, hitChance));
 
-      if(roll <= 25 + Math.floor(control / 10)){
-        g.strikes = Math.min(3, g.strikes + 1); playSound('strike'); addLog(`${g.pitchType}でストライク。`,'em');
-      } else if(roll <= 45 - Math.floor(control / 10)){
-        g.balls = Math.min(4, g.balls + 1); playSound('ball'); addLog(`${g.pitchType}はボール。`,'em');
-      } else {
-        const inplayRoll = randi(1,100) + Math.floor((batterPower - stuff) / 2) - Math.floor(g.defense / 4);
-
-        if(inplayRoll <= 68){
-          const dpType = getDoublePlayType(); playSound('hit'); setTimeout(()=>playSound('out'), 300);
-          if(dpType){ g.outs+=2; creditPitchingOuts(2); clearCount(); g.bases[2]=g.bases[1]; g.bases[1]=g.bases[0]; g.bases[0]=null; addLog('ゲッツー！','good'); }
-          else { g.outs++; creditPitchingOuts(1); clearCount(); addLog('打たせてアウト。','good'); }
-          advanceAwayBatter();
-        }
-        else if(inplayRoll <= 86){ clearCount(); creditPitchRuns(advanceOnHit('single','away',batter)); creditPitchHit('single'); playSound('hit'); addLog('ヒット。','bad'); advanceAwayBatter(); }
-        else if(inplayRoll <= 94){ clearCount(); creditPitchRuns(advanceOnHit('double','away',batter)); creditPitchHit('double'); playSound('hit'); addLog('二塁打。','bad'); advanceAwayBatter(); }
-        else if(inplayRoll <= 96){ clearCount(); creditPitchRuns(advanceOnHit('triple','away',batter)); creditPitchHit('triple'); playSound('hit'); addLog('三塁打。','bad'); advanceAwayBatter(); }
-        else { clearCount(); creditPitchRuns(advanceOnHit('hr','away',batter)); creditPitchHit('hr'); playSound('hit'); setTimeout(()=>playSound('cheer'), 200); addLog('ホームラン。','bad'); advanceAwayBatter(); }
+      const roll = randi(1,100);
+      if(roll <= Math.max(7, 17 + (pitcher.stuff-65)*0.25 - staminaPenalty*0.4)){
+        g.strikes++; playSound('strike'); addLog(`${g.pitchType}で空振り。`,'good');
+        if(g.strikes >= 3){ g.outs++; clearCount(); creditPitchStrikeout(); creditPitchingOuts(1); playSound('out'); addLog('三振！','good'); advanceAwayBatter(); }
       }
-
-      if(g.strikes >= 3){ g.outs++; creditPitchStrikeout(); creditPitchingOuts(1); clearCount(); playSound('out'); addLog('三振！','good'); advanceAwayBatter(); }
-      if(g.balls >= 4){ const f = forceWalkAdvance('away'); clearCount(); creditPitchWalk(); addLog(f?'四球押し出し。':'四球。','bad'); advanceAwayBatter(); }
-      
+      else if(roll <= 28 - (pitcher.control-65)*0.2 + staminaPenalty*0.2){
+        g.balls++; playSound('ball'); addLog(`${g.pitchType}が外れてボール。`,'em');
+        if(g.balls >= 4){ const forcedRun = forceWalkAdvance('away'); clearCount(); creditPitchWalk(); if(forcedRun){creditPitchRuns(1); addLog('四球押し出し。','bad')} else addLog('四球で出塁。','bad'); advanceAwayBatter(); }
+      }
+      else if(roll <= 28 + hitChance){
+        const power = batter.power + (batter.traits.includes('ホームランバッター') ? 8 : 0);
+        const hrC = Math.max(2, (power-55)*0.24);
+        const kind = chance(hrC) ? 'hr' : chance(14) ? 'double' : chance(4) ? 'triple' : 'single';
+        const runs = advanceOnHit(kind,'away',batter);
+        creditPitchHit(kind); if(runs>0) creditPitchRuns(runs);
+        playSound('hit'); if(kind==='hr') playSound('cheer');
+        addLog(`${batter.name}、${kind==='hr'?'ホームラン':kind==='triple'?'三塁打':kind==='double'?'二塁打':'ヒット'}。${runs?runs+'点を失う。':''}`, runs?'bad':'em');
+        clearCount(); advanceAwayBatter();
+      }
+      else {
+        const dpType = getDoublePlayType();
+        if(dpType && g.outs <= 1){
+          g.outs += 2; creditPitchingOuts(2); g.bases[0]=null; if(dpType==='home') g.bases[2]=null; playSound('out'); addLog('注文通りの併殺打！','good');
+        } else { g.outs++; creditPitchingOuts(1); playSound('out'); addLog('打たせて取った。アウト。','good'); }
+        clearCount(); advanceAwayBatter();
+      }
       if(checkWalkOff()) { finishGame(); return; }
-      if(g.outs >= 3) nextHalf(); else { setNarration('守備采配',`相手打者は ${g.batter}。`); showDefenseActions(); } renderAll();
+      if(g.outs >= 3) nextHalf(); else { setNarration('守備采配',`相手打者は ${g.batter}。`); showDefenseActions(); }
+      renderAll();
     }
+
+    function currentPitchList(){ return currentDefensivePitcher().pitches; }
 
     function resolveBat(type){
       const g = state.game; const batter = g.homeLineup[g.currentHomeBatterIndex]; const pitcher = currentAwayPitcher(); setCurrentDisplayedNames();
-      g.pitchType = pitcher.pitches[randi(0,pitcher.pitches.length-1)];
-      let pitchDifficulty = pitcher.stuff + Math.floor(g.awayPitcherStamina / 8);
-      let pitcherControl = pitcher.control + Math.floor(g.awayPitcherStamina / 10);
-      g.awayPitcherStamina = Math.max(0, g.awayPitcherStamina - 3);
-
-      if(pitcher.traits.includes('エース') && g.inning <= 3) { pitchDifficulty += 10; pitcherControl += 10; }
-      if(pitcher.traits.includes('クローザー') && g.inning >= 9 && g.awayScore > g.homeScore) { pitchDifficulty += 15; pitcherControl += 15; }
-
-      let batterContact = batter.contact + (type === 'power' ? -10 : 10);
-      let batterPower = batter.power + (type === 'power' ? 25 : 0);
-
-      if(batter.traits.includes('ホームランバッター')) { batterPower += 15; batterContact -= 5; }
-      if(batter.traits.includes('代打の切り札') && g.inning >= 7) { batterPower += 20; batterContact += 15; }
-
+      
       if(type === 'take'){
-        if(randi(1,100) + Math.floor((pitcherControl - batterContact) / 8) <= 45){ g.balls = Math.min(4, g.balls + 1); playSound('ball'); addLog('見送ってボール。','good'); }
-        else { g.strikes = Math.min(3, g.strikes + 1); playSound('strike'); addLog('見送ってストライク。','bad'); }
+        if(chance(52)){ g.balls++; playSound('ball'); addLog('じっくり見送ってボール。','good'); }
+        else { g.strikes++; playSound('strike'); addLog('見逃しストライク。','bad'); }
+        if(g.balls >= 4){ forceWalkAdvance('home'); clearCount(); addLog('四球で出塁。','good'); advanceHomeBatter(); }
+        if(g.strikes >= 3){ g.outs++; clearCount(); playSound('out'); addLog('見逃し三振。','bad'); advanceHomeBatter(); }
       }
       else if(type === 'bunt'){
-        if(randi(1,100) + Math.floor((pitchDifficulty - batterContact) / 8) <= 65){
-          clearCount(); g.outs++; if(g.bases[2]){ addRun('home',1); g.bases[2]=null; } if(g.bases[1]){ g.bases[2]=g.bases[1]; g.bases[1]=null; } if(g.bases[0]){ g.bases[1]=g.bases[0]; g.bases[0]=null; }
-          batter.stats.ab += 1; playSound('hit'); addLog('送りバント成功。','em'); advanceHomeBatter();
-        } else { clearCount(); g.outs++; batter.stats.ab += 1; playSound('out'); addLog('バント失敗。','bad'); advanceHomeBatter(); }
+        if(g.outs >= 2 || (!g.bases[0] && !g.bases[1])){ addLog('バントの場面ではありません。','em'); showOffenseActions(); renderAll(); return; }
+        if(chance(72 + Math.max(0,batter.contact-60)*0.2)){
+          g.outs++; playSound('out');
+          if(g.bases[2]) { addRun('home',1); g.bases[2]=null; addLog('スクイズ成功！1点追加。','good'); }
+          else { g.bases[2]=g.bases[1]; g.bases[1]=g.bases[0]; g.bases[0]=null; addLog('送りバント成功。','good'); }
+          clearCount(); advanceHomeBatter();
+        } else { g.strikes++; playSound('strike'); addLog('バント失敗。ファウル。','bad'); if(g.strikes>=3){g.outs++; clearCount(); advanceHomeBatter();} }
       }
       else {
-        const contactRoll = randi(1,100) + Math.floor((batterContact - pitchDifficulty) / 2);
-        if(contactRoll <= 25 + Math.floor(pitcherControl / 10)){ g.strikes = Math.min(3, g.strikes + 1); playSound('strike'); addLog('空振り／見逃しストライク。','bad'); }
-        else if(contactRoll <= 45 - Math.floor(pitcherControl / 10)){ g.balls = Math.min(4, g.balls + 1); playSound('ball'); addLog('ボール。','em'); }
+        const powerSwing = type === 'power';
+        const staminaPenalty = g.awayPitcherStamina < 30 ? 7 : g.awayPitcherStamina < 50 ? 3 : 0;
+        let hitChance = 27 + (batter.contact - 60)*0.28 + (powerSwing ? -4 : 0) - (pitcher.stuff-65)*0.18 + staminaPenalty;
+        if(batter.traits.includes('代打の切り札') && !g.homeLineup.slice(0,9).includes(batter)) hitChance += 5;
+        if(batter.traits.includes('ホームランバッター')) hitChance += 1;
+        hitChance = Math.max(13, Math.min(45, hitChance));
+        g.awayPitcherStamina = Math.max(0, g.awayPitcherStamina - 3);
+
+        const roll = randi(1,100);
+        if(roll <= 15 + (powerSwing ? 8 : 0)){
+          g.strikes++; playSound('strike'); addLog('空振り。','bad');
+          if(g.strikes>=3){ g.outs++; clearCount(); playSound('out'); addLog('三振。','bad'); advanceHomeBatter(); }
+        }
+        else if(roll <= 27){
+          g.balls++; playSound('ball'); addLog('ボール。','em');
+          if(g.balls>=4){ forceWalkAdvance('home'); clearCount(); addLog('四球で出塁。','good'); advanceHomeBatter(); }
+        }
+        else if(roll <= 27 + hitChance){
+          const pwr = batter.power + (powerSwing ? 10 : 0) + (batter.traits.includes('ホームランバッター') ? 8 : 0);
+          const kind = chance(Math.max(2,(pwr-55)*0.3)) ? 'hr' : chance(15) ? 'double' : chance(4) ? 'triple' : 'single';
+          const runs = advanceOnHit(kind,'home',batter);
+          batter.stats.ab++; batter.stats.h++; if(kind==='double') batter.stats.d2++; if(kind==='triple') batter.stats.d3++; if(kind==='hr') batter.stats.hr++; batter.stats.rbi += runs;
+          playSound('hit'); if(runs) playSound('cheer');
+          addLog(`${batter.name}、${kind==='hr'?'ホームラン':kind==='triple'?'三塁打':kind==='double'?'二塁打':'ヒット'}！${runs?runs+'点追加！':''}`, runs?'good':'em');
+          clearCount(); advanceHomeBatter();
+          if(checkWalkOff()) { finishGame(); return; }
+        }
         else {
-          const inplayRoll = randi(1,100) + Math.floor((batterPower - pitchDifficulty) / 2);
-          if(inplayRoll <= 68){
-            batter.stats.ab += 1; const dpType = getDoublePlayType(); playSound('hit'); setTimeout(()=>playSound('out'), 300);
-            if(dpType){ g.outs+=2; clearCount(); g.bases[2]=g.bases[1]; g.bases[1]=g.bases[0]; g.bases[0]=null; addLog('ゲッツー。','bad'); }
-            else { g.outs++; clearCount(); addLog('凡退。','bad'); }
-            advanceHomeBatter();
-          }
-          else if(inplayRoll <= 86){ batter.stats.ab++; batter.stats.h++; clearCount(); batter.stats.rbi += advanceOnHit('single','home',batter); playSound('hit'); addLog('ヒット！','good'); advanceHomeBatter(); }
-          else if(inplayRoll <= 94){ batter.stats.ab++; batter.stats.h++; batter.stats.d2++; clearCount(); batter.stats.rbi += advanceOnHit('double','home',batter); playSound('hit'); addLog('二塁打！','good'); advanceHomeBatter(); }
-          else if(inplayRoll <= 96){ batter.stats.ab++; batter.stats.h++; batter.stats.d3++; clearCount(); batter.stats.rbi += advanceOnHit('triple','home',batter); playSound('hit'); addLog('三塁打！','good'); advanceHomeBatter(); }
-          else { batter.stats.ab++; batter.stats.h++; batter.stats.hr++; clearCount(); batter.stats.rbi += advanceOnHit('hr','home',batter); playSound('hit'); setTimeout(()=>playSound('cheer'), 200); addLog('ホームラン！','good'); advanceHomeBatter(); }
+          const dpType = getDoublePlayType();
+          if(dpType && g.outs <= 1){ g.outs+=2; g.bases[0]=null; playSound('out'); addLog('併殺打。','bad'); }
+          else { g.outs++; playSound('out'); addLog('凡退。','bad'); }
+          batter.stats.ab++; clearCount(); advanceHomeBatter();
         }
       }
-
-      if(g.strikes >= 3){ batter.stats.ab++; batter.stats.so++; g.outs++; clearCount(); playSound('out'); addLog('三振。','bad'); advanceHomeBatter(); }
-      if(g.balls >= 4){ const f = forceWalkAdvance('home'); batter.stats.bb++; clearCount(); if(f){ batter.stats.rbi++; playSound('cheer'); addLog('四球押し出し。','good');}else{ addLog('四球。','good');} advanceHomeBatter(); }
-      
-      if(checkWalkOff()) { finishGame(); return; }
-      if(g.outs >= 3) nextHalf(); else { setNarration('攻撃采配',`こちらの攻撃です。${g.batter} が打席へ。`); showOffenseActions(); } renderAll();
+      if(g.outs >= 3) nextHalf(); else { setNarration('攻撃采配',`こちらの攻撃です。${g.batter} が打席へ。`); showOffenseActions(); }
+      renderAll();
     }
 
     function stealAttempt(){
-      const g = state.game; if(!g.bases[0] || g.bases[1]){ addLog('盗塁不可。','bad'); return; }
-      const runner = g.bases[0]; const isSBKing = runner.traits && runner.traits.includes('盗塁王');
-      const baseSpeed = runner && runner.speed ? runner.speed : 55;
-      const success = chance(isSBKing ? 75 : (35 + Math.floor(baseSpeed / 2) - 20));
-
-      if(success){
-        if(runner && runner.stats) runner.stats.sb++; g.bases[1]=g.bases[0]; g.bases[0]=null; playSound('strike'); addLog('盗塁成功！','good');
-      } else { g.bases[0]=null; g.outs++; playSound('out'); addLog('盗塁失敗。','bad'); }
-      
-      if(checkWalkOff()) { finishGame(); return; }
-      if(g.outs>=3) nextHalf(); else { setNarration('攻撃采配',`こちらの攻撃です。${g.batter} が打席へ。`); showOffenseActions(); } renderAll();
+      const g = state.game; const runner = g.bases[0];
+      if(!runner || g.bases[1]){ addLog('盗塁できる走者がいません。','em'); renderAll(); return; }
+      const success = 52 + (runner.speed - 50)*0.5 + (runner.traits?.includes('盗塁王') ? 12 : 0) - (currentAwayPitcher().control-60)*0.2;
+      if(chance(success)){ g.bases[1]=g.bases[0]; g.bases[0]=null; playSound('cheer'); addLog('盗塁成功！','good'); }
+      else { g.bases[0]=null; g.outs++; playSound('out'); addLog('盗塁失敗。','bad'); }
+      if(g.outs>=3) nextHalf(); else { showOffenseActions(); renderAll(); }
     }
 
-    function forceAdvanceBatter(){ if(state.game.offense === 'home'){ advanceHomeBatter(); showOffenseActions(); } renderAll(); }
+    function forceAdvanceBatter(){
+      // デバッグ/詰まり防止用
+      if(state.game.offense === 'home') advanceHomeBatter(); else advanceAwayBatter();
+      clearCount();
+      addLog('次打者へ進めました。','em');
+      if(state.game.offense === 'home') showOffenseActions(); else showDefenseActions();
+      renderAll();
+    }
 
     function finishGame(){
       const g = state.game; const win = g.homeScore >= g.awayScore;
       const my = state.standings.find(t=>t.name==='TOKYO BLUE STARS'); const opp = state.standings.find(t=>t.name===g.away);
+      const isExhibition = state.seasonType === 'allstar';
 
-      if(win){ state.record.w++; if(my) my.w++; if(opp) opp.l++; currentHomePitcher().stats.w++; addLog(`勝利。`,'good'); }
+      if(isExhibition){
+        addLog(win ? 'オールスター勝利。ペナント成績には加算されません。' : 'オールスター敗戦。ペナント成績には加算されません。', win ? 'good' : 'bad');
+      }
+      else if(win){ state.record.w++; if(my) my.w++; if(opp) opp.l++; currentHomePitcher().stats.w++; addLog(`勝利。`,'good'); }
       else { state.record.l++; if(my) my.l++; if(opp) opp.w++; currentHomePitcher().stats.l++; addLog(`敗北。`,'bad'); }
 
       // 他球場の試合を最後までシミュレートして結果を確定
@@ -1174,9 +1278,12 @@
           }
           if(m.homeScore === m.awayScore) { if(chance(50)) m.homeScore++; else m.awayScore++; }
           
-          const hTeam = state.standings.find(t=>t.name === m.home);
-          const aTeam = state.standings.find(t=>t.name === m.away);
-          if(m.homeScore > m.awayScore) { hTeam.w++; aTeam.l++; } else { hTeam.l++; aTeam.w++; }
+          if(!isExhibition){
+            const hTeam = state.standings.find(t=>t.name === m.home);
+            const aTeam = state.standings.find(t=>t.name === m.away);
+            if(m.homeScore > m.awayScore) { if(hTeam) hTeam.w++; if(aTeam) aTeam.l++; }
+            else { if(hTeam) hTeam.l++; if(aTeam) aTeam.w++; }
+          }
           
           otherResultsText += `${m.home} ${m.homeScore} - ${m.awayScore} ${m.away}<br>`;
         });
@@ -1192,19 +1299,59 @@
       }
     }
 
-    function nextGame(){
-      state.scheduleIndex++;
-      if(state.scheduleIndex >= state.seasonLen){ showEnding(); return; }
-      
+    function reducePitcherRestDays(){
       state.roster.pitchers.forEach(p => {
         if(p.restDays > 0) p.restDays--;
       });
-      
+    }
+
+    function nextGame(){
+      // 通常シーズン
+      if(state.seasonType === 'regular'){
+        state.scheduleIndex++;
+        reducePitcherRestDays();
+        if(state.scheduleIndex >= state.seasonLen){
+          startClimax();
+          return;
+        }
+        prepareNextGame();
+        return;
+      }
+
+      // オールスター後は同じ scheduleIndex のままペナント後半へ戻る
+      if(state.seasonType === 'allstar'){
+        state.seasonType = 'regular';
+        prepareNextGame();
+        return;
+      }
+
+      // クライマックスを勝ち抜いたら日本シリーズへ
+      if(state.seasonType === 'climax'){
+        startJapanSeries();
+        return;
+      }
+
+      // 日本シリーズ後はエンディング
+      if(state.seasonType === 'series'){
+        showEnding();
+        return;
+      }
+
+      // 旧データ互換
+      state.seasonType = 'regular';
       prepareNextGame();
     }
 
     function restoreView(){
+      if(!state.seasonType) state.seasonType = 'regular';
+      if(typeof state.allStarDone !== 'boolean') state.allStarDone = false;
       if(state.mode === 'title') showTitle();
+      else if(state.mode === 'event') {
+        if(state.seasonType === 'allstar') startAllStar();
+        else if(state.seasonType === 'climax') startClimax();
+        else if(state.seasonType === 'series') startJapanSeries();
+        else prepareNextGame();
+      }
       else if(state.mode === 'select_starter') prepareNextGame();
       else if(state.mode === 'ceremony') { 
         setCurrentDisplayedNames();
