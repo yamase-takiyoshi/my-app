@@ -3,11 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pennant Manager DX</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="icon" href="./favicon-32.png" sizes="32x32" type="image/png">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-  <meta name="theme-color" content="#16365c">
+  <title>Pennant Manager DX Complete</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='25' fill='%2316365c'/%3E%3Ctext x='50' y='72' font-family='sans-serif' font-size='65' font-weight='900' fill='%23ffd66c' text-anchor='middle'%3EP%3C/text%3E%3Ccircle cx='80' cy='20' r='10' fill='%23fff'/%3E%3C/svg%3E" type="image/svg+xml">
   <style>
     :root {
       /* Base Theme (Dark) Variables */
@@ -375,8 +372,8 @@
   <div id="tutorialOverlay">
     <div class="tutorial-card" id="tutorialCard">
       <div class="tutorial-icon" id="tutorialIcon">✨</div>
-      <h3 class="tutorial-title" id="tutorialTitle">ようこそ！</h3>
-      <p class="tutorial-text" id="tutorialText">Pennant Manager DXへようこそ！<br>あなたは今日から「TOKYO BLUE STARS」の監督です。</p>
+      <h3 class="tutorial-title" id="tutorialTitle">Title</h3>
+      <p class="tutorial-text" id="tutorialText">Text</p>
       <div class="tutorial-footer">
         <div class="tutorial-dots" id="tutorialDots"></div>
         <div class="tutorial-controls">
@@ -428,8 +425,8 @@
     <main class="main card">
       <section class="scoreboard">
         <div class="team-label" id="scoreLabel">TOKYO BLUE STARS 監督室</div>
-        <div class="pill" id="phasePill">MANAGER</div>
-        <div class="pill" id="modePill">球種：オート</div>
+        <div class="pill" id="phasePill">TITLE</div>
+        <div class="pill" id="modePill">AUTO</div>
         <div class="pill" id="pitchTypePill">-</div>
         <div class="pill" id="inningPill">1回表</div>
         <div class="score-big" id="homeScore">0</div>
@@ -518,7 +515,7 @@
       { icon: '🏆', color: '#ffd66c', bg: 'linear-gradient(135deg, #ffe6a2, #ffd66c)', title: "ゲームの目的", text: "監督として選手にサインを出し、ペナントレースを勝ち抜いて日本一を目指しましょう。<br>試合状況に応じた的確な指示が勝敗を分けます。" },
       { icon: '⚾', color: '#7dcaff', bg: 'linear-gradient(135deg, #aee5ff, #7dcaff)', title: "試合準備", text: "試合前には先発投手を選びます。<br>投手にはスタミナがあり、登板後は中数日の休養が必要です。ローテーションを考えて起用しましょう。" },
       { icon: '🧤', color: '#88ecb1', bg: 'linear-gradient(135deg, #bcf2cf, #88ecb1)', title: "守備采配", text: "守備時は「勝負」「一球外す」などのサインを出します。<br>投手のスタミナや能力、相手打者の強さを見極めて指示を出しましょう。" },
-      { icon: '🎯', color: '#c8adff', bg: 'linear-gradient(135deg, #e4d6ff, #c8adff)', title: "投球モード", text: "「球種：オート/手動」で手動モードにすると、投手の持つ「ストレート」や「変化球」などの球種を1球ごとに細かく指定できます。" },
+      { icon: '🎯', color: '#c8adff', bg: 'linear-gradient(135deg, #e4d6ff, #c8adff)', title: "投球モード", text: "「AUTO/指定切替」でマニュアルモードにすると、投手の持つ「ストレート」や「変化球」などの球種を1球ごとに細かく指定できます。" },
       { icon: '🦇', color: '#ffb66c', bg: 'linear-gradient(135deg, #ffd6a8, #ffb66c)', title: "攻撃采配", text: "攻撃時は「打たせる」「強振」「バント」などのサインがあります。<br>確実にランナーを進めるか、一発を狙うか、状況に応じて使い分けましょう。" },
       { icon: '🏃', color: '#ff9ca2', bg: 'linear-gradient(135deg, #ffbdc2, #ff9ca2)', title: "代打と盗塁", text: "チャンスの場面では「代打」を起用したり、足の速いランナーがいる時は「盗塁」を指示して、試合を有利に進めましょう。" },
       { icon: '⭐', color: '#ffd66c', bg: 'linear-gradient(135deg, #ffe6a2, #ffd66c)', title: "選手の特性", text: "選手には「エース」「ホームランバッター」「盗塁王」などの特性があります。<br>これらの特性を持つ選手は、特定の状況で能力がアップします。" },
@@ -1196,7 +1193,7 @@
       const g = state.game;
       els.scoreLabel.textContent = g && g.home ? `${g.home} vs ${g.away}` : 'TOKYO BLUE STARS 監督室';
       els.phasePill.textContent = state.mode.toUpperCase();
-      els.modePill.textContent = g && g.pitchMode === 'manual' ? '球種：手動' : '球種：オート';
+      els.modePill.textContent = g && g.pitchMode === 'manual' ? '球種: 手動' : '球種: オート';
       els.pitchTypePill.textContent = g ? (g.pitchType || '-') : '-';
       els.inningPill.textContent = g && g.inning ? `${g.inning}回${g.half === 'top' ? '表' : '裏'}` : '-';
       els.homeScore.textContent = g && g.homeScore !== undefined ? g.homeScore : '0'; els.awayScore.textContent = g && g.awayScore !== undefined ? g.awayScore : '0';
@@ -1489,7 +1486,7 @@
       setActions(
         [{label:'勝負',className:'gold',onClick:()=>resolvePitch('attack')}, {label:'一球外す',className:'orange',onClick:()=>resolvePitch('waste')},
          {label:'申告敬遠',className:'purple',onClick:()=>resolvePitch('ibb')}, {label:'牽制',className:'secondary',onClick:()=>resolvePitch('pickoff')}],
-        [{label:'球種：オート/手動',onClick:toggleMode}, {label:'球種指定',className:'purple',onClick:pickPitch,disabled:state.game.pitchMode!=='manual'},
+        [{label:'球種: オート/手動',onClick:toggleMode}, {label:'球種指定',className:'purple',onClick:pickPitch,disabled:state.game.pitchMode!=='manual'},
          {label:'継投',onClick:changePitcherMenu}, {label:'1試合クリアー',className:'red',onClick:confirmRestartGame}]
       );
     }
