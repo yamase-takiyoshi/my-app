@@ -77,7 +77,7 @@
     .narration{
       padding:14px; border-radius:16px; border:1px solid var(--line);
       background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));
-      line-height:1.85; min-height:160px; white-space:pre-wrap; flex-grow: 1;
+      line-height:1.85; min-height:160px; white-space:pre-wrap; flex-grow: 1; overflow-y:auto;
     }
     .event-narration {
       text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -304,7 +304,6 @@
       }
     }
 
-    // メロディ再生エンジン
     function playMelody(notes, speed = 1.0) {
       if(audioCtx.state === 'suspended') return;
       let time = audioCtx.currentTime;
@@ -326,10 +325,10 @@
     }
 
     const JINGLES = {
-      playball: [[523.25, 0.2], [659.25, 0.2], [783.99, 0.2], [1046.50, 0.6]], // C E G C
-      halftime: [[392.00, 0.2], [523.25, 0.2], [659.25, 0.2], [523.25, 0.2], [659.25, 0.4]], // G C E C E
-      hero: [[1046.50, 0.15], [1318.51, 0.15], [1567.98, 0.3], [1318.51, 0.15], [2093.00, 0.6]], // C E G E C(High)
-      ending: [ // 長めのメロディループ
+      playball: [[523.25, 0.2], [659.25, 0.2], [783.99, 0.2], [1046.50, 0.6]],
+      halftime: [[392.00, 0.2], [523.25, 0.2], [659.25, 0.2], [523.25, 0.2], [659.25, 0.4]],
+      hero: [[1046.50, 0.15], [1318.51, 0.15], [1567.98, 0.3], [1318.51, 0.15], [2093.00, 0.6]],
+      ending: [
         [523.25, 0.4], [587.33, 0.4], [659.25, 0.8], [523.25, 0.4], [659.25, 0.4], [783.99, 0.8],
         [880.00, 0.4], [783.99, 0.4], [659.25, 0.8], [587.33, 1.2]
       ]
@@ -337,6 +336,15 @@
 
     // ---- GAME LOGIC ----
     const LEAGUE_TEAMS = ['TOKYO BLUE STARS','OSAKA TIGERS','NAGOYA COMETS','YOKOHAMA WAVES','FUKUOKA PHOENIX','SENDAI NORTHERNS'];
+    // 5節で一巡する対戦カードパターン（0は常に自チーム）
+    const MATCH_PATTERNS = [
+      [[0,1], [2,3], [4,5]],
+      [[0,2], [1,4], [3,5]],
+      [[0,3], [1,5], [2,4]],
+      [[0,4], [1,3], [2,5]],
+      [[0,5], [1,2], [3,4]]
+    ];
+
     const $ = id => document.getElementById(id);
     const els = {
       standingsBox:$('standingsBox'), saveSlots:$('saveSlots'), scoreLabel:$('scoreLabel'),
@@ -361,7 +369,6 @@
     function batAvg(s){ return s.ab ? (s.h / s.ab).toFixed(3) : '.000'; }
     function era(s){ return s.outs ? ((s.er * 27) / s.outs).toFixed(2) : '0.00'; }
 
-    // 特性(Traits)を追加
     function createHomeHitters(){
       return [
         {name:'青山',pos:'CF',contact:72,power:56,speed:78,defense:71,traits:['盗塁王'],stats:makeBatStats()},
@@ -380,12 +387,13 @@
     }
     function createHomePitchers(){
       return [
-        {name:'有馬',role:'SP',stamina:100,control:67,stuff:71,traits:['エース'],pitches:['ストレート','スライダー','フォーク'],stats:makePitchStats()},
-        {name:'神田',role:'SP',stamina:96,control:72,stuff:65,traits:['先発'],pitches:['ストレート','カーブ','チェンジアップ'],stats:makePitchStats()},
-        {name:'若林',role:'SP',stamina:94,control:64,stuff:69,traits:['先発'],pitches:['ストレート','ツーシーム','スプリット'],stats:makePitchStats()},
-        {name:'堀',role:'RP',stamina:74,control:59,stuff:68,traits:['中継ぎ'],pitches:['ストレート','スライダー'],stats:makePitchStats()},
-        {name:'戸塚',role:'RP',stamina:71,control:66,stuff:60,traits:['中継ぎ'],pitches:['ストレート','カット','シンカー'],stats:makePitchStats()},
-        {name:'片桐',role:'CL',stamina:68,control:63,stuff:75,traits:['クローザー'],pitches:['ストレート','スライダー','フォーク'],stats:makePitchStats()}
+        {name:'有馬',role:'SP',stamina:100,control:67,stuff:71,traits:['エース'],pitches:['ストレート','スライダー','フォーク'],stats:makePitchStats(), restDays:0},
+        {name:'神田',role:'SP',stamina:96,control:72,stuff:65,traits:['先発'],pitches:['ストレート','カーブ','チェンジアップ'],stats:makePitchStats(), restDays:0},
+        {name:'若林',role:'SP',stamina:94,control:64,stuff:69,traits:['先発'],pitches:['ストレート','ツーシーム','スプリット'],stats:makePitchStats(), restDays:0},
+        {name:'五十嵐',role:'SP',stamina:85,control:68,stuff:64,traits:['先発'],pitches:['ストレート','スライダー','チェンジアップ'],stats:makePitchStats(), restDays:0},
+        {name:'堀',role:'RP',stamina:74,control:59,stuff:68,traits:['中継ぎ'],pitches:['ストレート','スライダー'],stats:makePitchStats(), restDays:0},
+        {name:'戸塚',role:'RP',stamina:71,control:66,stuff:60,traits:['中継ぎ'],pitches:['ストレート','カット','シンカー'],stats:makePitchStats(), restDays:0},
+        {name:'片桐',role:'CL',stamina:68,control:63,stuff:75,traits:['クローザー'],pitches:['ストレート','スライダー','フォーク'],stats:makePitchStats(), restDays:0}
       ];
     }
     function createAwayLineup(){
@@ -404,6 +412,8 @@
     function createAwayPitchers(){
       return [
         {name:'工藤',role:'SP',stamina:98,control:66,stuff:69,traits:['エース'],pitches:['ストレート','スライダー','フォーク'],stats:makePitchStats()},
+        {name:'西村',role:'SP',stamina:88,control:70,stuff:62,traits:['先発'],pitches:['ストレート','カーブ','シュート'],stats:makePitchStats()},
+        {name:'武田',role:'SP',stamina:90,control:63,stuff:67,traits:['先発'],pitches:['ストレート','スライダー'],stats:makePitchStats()},
         {name:'阿久津',role:'RP',stamina:72,control:61,stuff:63,traits:['中継ぎ'],pitches:['ストレート','カーブ'],stats:makePitchStats()},
         {name:'榎本',role:'CL',stamina:66,control:64,stuff:74,traits:['クローザー'],pitches:['ストレート','スライダー','スプリット'],stats:makePitchStats()}
       ];
@@ -419,23 +429,37 @@
       };
     }
 
-    function buildGame(){
-      const away = LEAGUE_TEAMS[(state.scheduleIndex % 5)+1];
+    function buildGame(starterIndex){
+      const round = state.scheduleIndex % 5;
+      const todaysMatches = MATCH_PATTERNS[round];
+      const away = LEAGUE_TEAMS[todaysMatches[0][1]];
+      
       const homeLineup = state.roster.hitters.slice(0,9);
-      // 「強肩」特性を持つ選手の数でチーム守備力にボーナス
+      const benchHitters = state.roster.hitters.slice(9);
       const strongArms = homeLineup.filter(h => h.traits.includes('強肩')).length;
       const baseDefense = Math.round(homeLineup.reduce((s,h)=>s+h.defense,0)/homeLineup.length);
       
+      const awayPitchers = createAwayPitchers();
+      const awayStarterIndex = state.scheduleIndex % 3;
+      state.roster.pitchers[starterIndex].restDays = 4;
+
+      // 他球場の試合データ
+      const otherMatches = [
+        { home: LEAGUE_TEAMS[todaysMatches[1][0]], away: LEAGUE_TEAMS[todaysMatches[1][1]], homeScore: 0, awayScore: 0, inning: 1 },
+        { home: LEAGUE_TEAMS[todaysMatches[2][0]], away: LEAGUE_TEAMS[todaysMatches[2][1]], homeScore: 0, awayScore: 0, inning: 1 }
+      ];
+
       return {
         inning:1, half:'top', outs:0, balls:0, strikes:0,
         home:'TOKYO BLUE STARS', away, homeScore:0, awayScore:0, offense:'away',
         bases:[null,null,null], inningRuns:{home:Array(9).fill('-'), away:Array(9).fill('-')},
         batter:null, pitcher:null, pitchMode:'auto', pitchType:'-', selectedPitch:null,
-        currentPitcherIndex:0, currentAwayPitcherIndex:0, currentHomeBatterIndex:0, currentAwayBatterIndex:0,
-        homeLineup, awayLineup:createAwayLineup(), awayPitchers:createAwayPitchers(),
-        pitcherStamina:state.roster.pitchers[0].stamina, awayPitcherStamina:98,
-        defense: baseDefense + (strongArms * 2), // 強肩ボーナス
-        isHalftimeDone: false
+        currentPitcherIndex:starterIndex, currentAwayPitcherIndex:awayStarterIndex, currentHomeBatterIndex:0, currentAwayBatterIndex:0,
+        homeLineup, benchHitters, awayLineup:createAwayLineup(), awayPitchers,
+        pitcherStamina:state.roster.pitchers[starterIndex].stamina, awayPitcherStamina:awayPitchers[awayStarterIndex].stamina,
+        defense: baseDefense + (strongArms * 2),
+        isHalftimeDone: false,
+        otherMatches
       };
     }
 
@@ -572,7 +596,6 @@
       if(g.offense !== 'away') return false;
       const runner = g.bases[0];
       if(runner && !g.bases[1]){
-        // 盗塁王特性で確率UP
         const isSBKing = state.game.awayLineup[g.currentAwayBatterIndex - 1 < 0 ? 8 : g.currentAwayBatterIndex - 1]?.traits.includes('盗塁王');
         if(chance(isSBKing ? 35 : 15)){
           g.bases[1] = g.bases[0]; g.bases[0] = null;
@@ -592,25 +615,65 @@
     function advanceAwayBatter(){ state.game.currentAwayBatterIndex = (state.game.currentAwayBatterIndex + 1) % state.game.awayLineup.length; setCurrentDisplayedNames(); }
     function advanceHomeBatter(){ state.game.currentHomeBatterIndex = (state.game.currentHomeBatterIndex + 1) % state.game.homeLineup.length; setCurrentDisplayedNames(); }
 
+    function checkWalkOff(){
+      const g = state.game;
+      if(g && g.inning >= 9 && g.half === 'bottom' && g.homeScore > g.awayScore){
+        addLog('サヨナラ勝ち！','good');
+        return true;
+      }
+      return false;
+    }
+
+    // 他球場のイニング進行・得点処理
+    function updateOtherMatches(half){
+      const g = state.game;
+      if(!g || !g.otherMatches) return;
+      g.otherMatches.forEach(m => {
+        if(m.inning > 9) return;
+        if(chance(22)){
+          const runs = randi(1,3);
+          if(half === 'top') m.awayScore += runs;
+          else m.homeScore += runs;
+        }
+      });
+    }
+
     function nextHalf(){
       const g = state.game; markInningIfNeeded();
 
       if(g.half === 'top'){
+        updateOtherMatches('top');
+
+        if(g.inning >= 9 && g.homeScore > g.awayScore) {
+          finishGame();
+          return;
+        }
+
         g.half = 'bottom'; g.offense = 'home'; g.outs = 0; clearCount(); g.bases = [null,null,null]; g.pitchType = '-'; g.selectedPitch = null;
         setCurrentDisplayedNames();
         setNarration('攻撃采配',`こちらの攻撃です。${g.batter} が打席へ。`);
         showOffenseActions();
       } else {
-        if(g.inning >= 9 && g.homeScore > g.awayScore) { finishGame(); return; } // サヨナラまたは裏なし
+        updateOtherMatches('bottom');
+
+        // 他球場の途中経過速報
+        if(g.inning === 3 || g.inning === 6) {
+          let msg = `【他球場速報 ${g.inning}回終了】\n`;
+          g.otherMatches.forEach(m => {
+            msg += `${m.home} ${m.homeScore} - ${m.awayScore} ${m.away} | `;
+          });
+          addLog(msg, 'special');
+        }
+
         if(g.inning >= 9 && g.homeScore !== g.awayScore) { finishGame(); return; }
         
-        // 5回裏終了時にハーフタイムショー
         if(g.inning === 5 && !g.isHalftimeDone) {
           g.isHalftimeDone = true;
           showHalftimeEvent();
           return;
         }
 
+        g.otherMatches.forEach(m => m.inning++);
         g.inning++; g.half = 'top'; g.offense = 'away'; g.outs = 0; clearCount(); g.bases = [null,null,null]; g.pitchType = '-'; g.selectedPitch = null;
         setCurrentDisplayedNames();
         setNarration('守備采配',`相手打者は ${g.batter}。`);
@@ -668,7 +731,7 @@
       els.inningPill.textContent = g ? `${g.inning}回${g.half === 'top' ? '表' : '裏'}` : '-';
       els.homeScore.textContent = g ? g.homeScore : '0'; els.awayScore.textContent = g ? g.awayScore : '0';
       
-      const isEvent = ['ceremony', 'halftime', 'hero', 'ending'].includes(state.mode);
+      const isEvent = ['ceremony', 'halftime', 'hero', 'ending', 'select_starter'].includes(state.mode);
       els.tvline.style.display = isEvent ? 'none' : 'flex';
       els.miniRow.style.display = isEvent ? 'none' : 'flex';
       els.eventBadge.style.display = isEvent ? 'inline-block' : 'none';
@@ -730,11 +793,20 @@
         els.benchBox.appendChild(d);
       });
 
+      if(state.game.benchHitters && state.game.benchHitters.length > 0){
+        state.game.benchHitters.forEach((h)=>{
+          const s = h.stats; const d = document.createElement('div'); d.className = 'player-card'; d.style.opacity = '0.7';
+          d.innerHTML = `<div class="player-name"><span>控. ${h.name} ${h.pos}</span> ${getTraitsHtml(h.traits)}</div><div class="tiny">AVG ${batAvg(s)} / HR ${s.hr} / RBI ${s.rbi}</div>`;
+          els.benchBox.appendChild(d);
+        });
+      }
+
       const pt = document.createElement('div'); pt.className = 'player-card'; pt.innerHTML = '<div class="player-name">投手成績</div>'; els.benchBox.appendChild(pt);
       state.roster.pitchers.forEach((p,i)=>{
         const s = p.stats; const d = document.createElement('div'); d.className = 'player-card';
-        const current = i === state.game.currentPitcherIndex ? ' ← 登板中' : '';
-        d.innerHTML = `<div class="player-name"><span>${p.name} ${p.role}${current}</span> ${getTraitsHtml(p.traits)}</div><div class="tiny">ERA ${era(s)} / W ${s.w} / SO ${s.so}</div>`;
+        const current = (state.mode !== 'select_starter' && state.game && i === state.game.currentPitcherIndex) ? ' ← 登板中' : '';
+        const restText = p.restDays > 0 ? ` (休養残り${p.restDays}日)` : '';
+        d.innerHTML = `<div class="player-name"><span>${p.name} ${p.role}${current}</span> ${getTraitsHtml(p.traits)}</div><div class="tiny">ERA ${era(s)} / W ${s.w} / SO ${s.so}${restText}</div>`;
         els.benchBox.appendChild(d);
       });
     }
@@ -763,7 +835,30 @@
     }
 
     function prepareNextGame(){
-      state.game = buildGame(); setCurrentDisplayedNames(); state.mode = 'ceremony';
+      state.mode = 'select_starter';
+      const round = state.scheduleIndex % 5;
+      const awayTeam = LEAGUE_TEAMS[MATCH_PATTERNS[round][0][1]];
+      setNarration('先発投手選択',`第${state.scheduleIndex+1}戦。相手は ${awayTeam}。\n本日の先発投手を選んでください。\n（先発登板後は中3日の休養が必要です）`);
+      
+      const primaryActions = state.roster.pitchers.map((p, i) => {
+        const isResting = p.restDays > 0;
+        return {
+          label: `${p.name} ${p.role} ${isResting ? `(休${p.restDays}日)` : ''}`,
+          className: isResting ? 'secondary' : 'gold',
+          disabled: isResting,
+          onClick: () => startGameWithStarter(i)
+        };
+      });
+
+      setActions(primaryActions, [{label:'保存(JSON)',className:'green',onClick:exportJSON}]);
+      if(!state.game) state.game = { homeLineup:state.roster.hitters.slice(0,9), benchHitters:state.roster.hitters.slice(9) };
+      renderAll();
+    }
+
+    function startGameWithStarter(starterIndex){
+      state.game = buildGame(starterIndex); 
+      setCurrentDisplayedNames(); 
+      state.mode = 'ceremony';
       setNarration('始球式 (First Pitch)','地元のアイドルによる始球式が行われます。<br>スタジアムは大歓声に包まれています！');
       playSound('cheer');
       setActions([{label:'プレイボール！',className:'gold',onClick:startGame}], [{label:'保存(JSON)',className:'green',onClick:exportJSON}]);
@@ -772,7 +867,7 @@
 
     function startGame(){
       state.mode = 'manager'; state.game.offense = 'away'; setCurrentDisplayedNames();
-      playMelody(JINGLES.playball); // プレイボール ファンファーレ
+      playMelody(JINGLES.playball);
       addLog('プレイボール！','special');
       setNarration('守備采配',`試合開始！ 相手打者は ${state.game.batter}。`);
       showDefenseActions(); renderAll();
@@ -791,15 +886,14 @@
       renderAll();
     }
 
-    function showHeroInterview(){
+    function showHeroInterview(otherResultsText = ''){
       state.mode = 'hero';
       playMelody(JINGLES.hero);
-      // 簡単なMVP選出（今回は先発投手か打点トップ）
       let mvp = state.roster.pitchers[0].name;
       const bestHitter = [...state.game.homeLineup].sort((a,b)=>b.stats.rbi - a.stats.rbi)[0];
       if(bestHitter && bestHitter.stats.rbi > 0) mvp = bestHitter.name;
 
-      setNarration('ヒーローインタビュー',`今日のヒーローは ${mvp} 選手です！<br>「監督の采配のおかげで勝てました！熱いご声援ありがとうございます！」`);
+      setNarration('ヒーローインタビュー',`今日のヒーローは ${mvp} 選手です！<br>「熱いご声援ありがとうございます！」<br><br>${otherResultsText}`);
       setActions([{label:'次の試合へ',className:'gold',onClick:nextGame}],[]);
       renderAll();
     }
@@ -838,8 +932,46 @@
       setActions(
         [{label:'打たせる',className:'gold',onClick:()=>resolveBat('normal')}, {label:'強振',className:'orange',onClick:()=>resolveBat('power')},
          {label:'バント',className:'secondary',onClick:()=>resolveBat('bunt')}, {label:'一球見送り',className:'secondary',onClick:()=>resolveBat('take')}],
-        [{label:'盗塁',className:'purple',onClick:stealAttempt}, {label:'次打者へ',onClick:forceAdvanceBatter}, {label:'保存(JSON)',className:'green',onClick:exportJSON}]
+        [{label:'代打',onClick:showPinchHitterMenu}, {label:'盗塁',className:'purple',onClick:stealAttempt}, {label:'次打者へ',onClick:forceAdvanceBatter}, {label:'保存(JSON)',className:'green',onClick:exportJSON}]
       );
+    }
+
+    function showPinchHitterMenu(){
+      const bench = state.game.benchHitters;
+      if(!bench || bench.length === 0){
+        addLog('ベンチに代打がいません。','bad');
+        renderAll();
+        return;
+      }
+      setNarration('代打','起用する代打を選んでください。');
+      setActions(
+        bench.map((p, i) => ({
+          label:`${p.name} ${p.pos}`, className:'gold',
+          onClick:()=>executePinchHitter(i)
+        })),
+        [{label:'戻る', onClick:()=>{
+          setNarration('攻撃采配',`こちらの攻撃です。${state.game.batter} が打席へ。`);
+          showOffenseActions(); renderAll();
+        }}]
+      );
+      renderAll();
+    }
+
+    function executePinchHitter(index){
+      const g = state.game;
+      const newBatter = g.benchHitters[index];
+      const oldBatterName = g.homeLineup[g.currentHomeBatterIndex].name;
+      
+      g.homeLineup[g.currentHomeBatterIndex] = newBatter;
+      g.benchHitters.splice(index, 1);
+      
+      setCurrentDisplayedNames();
+      playSound('cheer');
+      addLog(`${oldBatterName} に代わって、代打 ${newBatter.name} ！`, 'special');
+      setNarration('攻撃采配', `代打 ${newBatter.name} が打席へ。`);
+      
+      showOffenseActions();
+      renderAll();
     }
 
     function toggleMode(){ state.game.pitchMode = state.game.pitchMode === 'auto' ? 'manual' : 'auto'; state.game.pitchType = '-'; showDefenseActions(); renderAll(); }
@@ -852,14 +984,26 @@
 
     function changePitcherMenu(){
       setNarration('継投','投入する投手を選んでください。');
-      setActions(state.roster.pitchers.map((p,i)=>({
-        label:`${p.name} ${p.role}`, className:i===state.game.currentPitcherIndex?'secondary':'gold', disabled:i===state.game.currentPitcherIndex,
-        onClick:()=>{ state.game.currentPitcherIndex=i; state.game.pitcher=p.name; state.game.pitcherStamina=p.stamina; playSound('cheer'); addLog(`${p.name} がマウンドへ。`,'special');
-        setNarration('守備采配',`投手は ${p.name} に代わりました。`); showDefenseActions(); renderAll(); }
-      })), [{label:'戻る',onClick:()=>{ setNarration('守備采配',`相手打者は ${state.game.batter}。`); showDefenseActions(); renderAll(); }}]);
+      setActions(state.roster.pitchers.map((p,i)=>{
+        const isResting = p.restDays > 0 && i !== state.game.currentPitcherIndex;
+        const isActive = i === state.game.currentPitcherIndex;
+        return {
+          label:`${p.name} ${p.role}${p.restDays > 0 ? ` (休${p.restDays})` : ''}`, 
+          className:(isActive || isResting) ? 'secondary' : 'gold', 
+          disabled:isActive || isResting,
+          onClick:()=>{ 
+            state.game.currentPitcherIndex=i; 
+            state.game.pitcher=p.name; 
+            state.game.pitcherStamina=p.stamina; 
+            p.restDays = Math.max(p.restDays, 1);
+            playSound('cheer'); 
+            addLog(`${p.name} がマウンドへ。`,'special');
+            setNarration('守備采配',`投手は ${p.name} に代わりました。`); showDefenseActions(); renderAll(); 
+          }
+        };
+      }), [{label:'戻る',onClick:()=>{ setNarration('守備采配',`相手打者は ${state.game.batter}。`); showDefenseActions(); renderAll(); }}]);
     }
 
-    // ---- RESOLUTION LOGIC (TRAITS APPLIED) ----
     function resolvePitch(type){
       const g = state.game; const batter = g.awayLineup[g.currentAwayBatterIndex]; const pitcher = currentHomePitcher(); setCurrentDisplayedNames();
 
@@ -868,13 +1012,16 @@
         if(g.bases[0] && chance(14 + Math.max(0, pitcher.control - 60)/2)){
           g.bases[0] = null; g.outs++; creditPitchingOuts(1); playSound('out'); addLog('一塁へ牽制。アウト。','good');
         } else { playSound('ball'); addLog('一塁へ牽制。セーフ。','em'); }
-        if(g.outs >= 3) nextHalf(); renderAll(); return;
+        if(checkWalkOff()) { finishGame(); return; }
+        if(g.outs >= 3) nextHalf(); else { setNarration('守備采配',`相手打者は ${g.batter}。`); showDefenseActions(); } renderAll(); return;
       }
 
       if(type === 'ibb'){
         clearCount(); g.pitchType = '申告敬遠'; const forcedRun = forceWalkAdvance('away'); creditPitchWalk(); playSound('ball');
         if(forcedRun){ creditPitchRuns(1); addLog('申告敬遠。押し出し。','bad'); } else { addLog('申告敬遠で歩かせた。','special'); }
-        advanceAwayBatter(); showDefenseActions(); renderAll(); return;
+        advanceAwayBatter(); 
+        if(checkWalkOff()) { finishGame(); return; }
+        setNarration('守備采配',`相手打者は ${g.batter}。`); showDefenseActions(); renderAll(); return;
       }
 
       if(type === 'waste'){
@@ -893,25 +1040,22 @@
           advanceAwayBatter();
         }
         if(g.balls >= 4){ const forcedRun = forceWalkAdvance('away'); clearCount(); creditPitchWalk(); addLog(forcedRun?'四球押し出し。':'四球。','bad'); advanceAwayBatter(); }
-        if(g.outs >= 3) nextHalf(); else showDefenseActions(); renderAll(); return;
+        
+        if(checkWalkOff()) { finishGame(); return; }
+        if(g.outs >= 3) nextHalf(); else { setNarration('守備采配',`相手打者は ${g.batter}。`); showDefenseActions(); } renderAll(); return;
       }
 
-      // 通常投球 + 特性の適用
       g.pitchType = (g.pitchMode === 'manual' && g.selectedPitch) ? g.selectedPitch : chooseAutoPitch(); usePitcherStamina(4);
       
       let stuff = pitcher.stuff + Math.floor(g.pitcherStamina / 8);
       let control = pitcher.control + Math.floor(g.pitcherStamina / 10);
       
-      // 特性バフ: エース (1〜3回で強化)
       if(pitcher.traits.includes('エース') && g.inning <= 3) { stuff += 10; control += 10; }
-      // 特性バフ: クローザー (9回以降、リード時強化)
       if(pitcher.traits.includes('クローザー') && g.inning >= 9 && g.homeScore > g.awayScore) { stuff += 15; control += 15; }
 
       let batterPower = batter.power;
       let batterContact = batter.contact;
-      // 敵の特性: ホームランバッター
       if(batter.traits.includes('ホームランバッター')) { batterPower += 15; batterContact -= 5; }
-      // 敵の特性: 代打の切り札
       if(batter.traits.includes('代打の切り札') && g.inning >= 7) { batterPower += 15; batterContact += 15; }
 
       const batterSkill = batterContact + batterPower * 0.4;
@@ -923,7 +1067,7 @@
       } else if(roll <= 45 - Math.floor(control / 10)){
         g.balls = Math.min(4, g.balls + 1); playSound('ball'); addLog(`${g.pitchType}はボール。`,'em');
       } else {
-        const inplayRoll = randi(1,100) + Math.floor((batterPower - stuff) / 2) - Math.floor(g.defense / 4); // 守備力でヒット率低下
+        const inplayRoll = randi(1,100) + Math.floor((batterPower - stuff) / 2) - Math.floor(g.defense / 4);
 
         if(inplayRoll <= 68){
           const dpType = getDoublePlayType(); playSound('hit'); setTimeout(()=>playSound('out'), 300);
@@ -939,7 +1083,9 @@
 
       if(g.strikes >= 3){ g.outs++; creditPitchStrikeout(); creditPitchingOuts(1); clearCount(); playSound('out'); addLog('三振！','good'); advanceAwayBatter(); }
       if(g.balls >= 4){ const f = forceWalkAdvance('away'); clearCount(); creditPitchWalk(); addLog(f?'四球押し出し。':'四球。','bad'); advanceAwayBatter(); }
-      if(g.outs >= 3) nextHalf(); else showDefenseActions(); renderAll();
+      
+      if(checkWalkOff()) { finishGame(); return; }
+      if(g.outs >= 3) nextHalf(); else { setNarration('守備采配',`相手打者は ${g.batter}。`); showDefenseActions(); } renderAll();
     }
 
     function resolveBat(type){
@@ -949,14 +1095,12 @@
       let pitcherControl = pitcher.control + Math.floor(g.awayPitcherStamina / 10);
       g.awayPitcherStamina = Math.max(0, g.awayPitcherStamina - 3);
 
-      // 敵投手特性
       if(pitcher.traits.includes('エース') && g.inning <= 3) { pitchDifficulty += 10; pitcherControl += 10; }
       if(pitcher.traits.includes('クローザー') && g.inning >= 9 && g.awayScore > g.homeScore) { pitchDifficulty += 15; pitcherControl += 15; }
 
       let batterContact = batter.contact + (type === 'power' ? -10 : 10);
       let batterPower = batter.power + (type === 'power' ? 25 : 0);
 
-      // 味方打者特性
       if(batter.traits.includes('ホームランバッター')) { batterPower += 15; batterContact -= 5; }
       if(batter.traits.includes('代打の切り札') && g.inning >= 7) { batterPower += 20; batterContact += 15; }
 
@@ -991,7 +1135,9 @@
 
       if(g.strikes >= 3){ batter.stats.ab++; batter.stats.so++; g.outs++; clearCount(); playSound('out'); addLog('三振。','bad'); advanceHomeBatter(); }
       if(g.balls >= 4){ const f = forceWalkAdvance('home'); batter.stats.bb++; clearCount(); if(f){ batter.stats.rbi++; playSound('cheer'); addLog('四球押し出し。','good');}else{ addLog('四球。','good');} advanceHomeBatter(); }
-      if(g.outs >= 3) nextHalf(); else showOffenseActions(); renderAll();
+      
+      if(checkWalkOff()) { finishGame(); return; }
+      if(g.outs >= 3) nextHalf(); else { setNarration('攻撃采配',`こちらの攻撃です。${g.batter} が打席へ。`); showOffenseActions(); } renderAll();
     }
 
     function stealAttempt(){
@@ -1002,8 +1148,10 @@
 
       if(success){
         if(runner && runner.stats) runner.stats.sb++; g.bases[1]=g.bases[0]; g.bases[0]=null; playSound('strike'); addLog('盗塁成功！','good');
-      } else { g.bases[0]=null; g.outs++; playSound('out'); addLog('盗塁失敗。','bad'); if(g.outs>=3) nextHalf(); }
-      renderAll();
+      } else { g.bases[0]=null; g.outs++; playSound('out'); addLog('盗塁失敗。','bad'); }
+      
+      if(checkWalkOff()) { finishGame(); return; }
+      if(g.outs>=3) nextHalf(); else { setNarration('攻撃采配',`こちらの攻撃です。${g.batter} が打席へ。`); showOffenseActions(); } renderAll();
     }
 
     function forceAdvanceBatter(){ if(state.game.offense === 'home'){ advanceHomeBatter(); showOffenseActions(); } renderAll(); }
@@ -1012,19 +1160,58 @@
       const g = state.game; const win = g.homeScore >= g.awayScore;
       const my = state.standings.find(t=>t.name==='TOKYO BLUE STARS'); const opp = state.standings.find(t=>t.name===g.away);
 
-      if(win){ state.record.w++; if(my) my.w++; if(opp) opp.l++; currentHomePitcher().stats.w++; addLog(`勝利。`,'good'); showHeroInterview(); }
-      else { state.record.l++; if(my) my.l++; if(opp) opp.w++; currentHomePitcher().stats.l++; addLog(`敗北。`,'bad'); state.mode = 'postgame'; setNarration('試合終了',`敗北しました。`); setActions([{label:'次の試合へ',className:'gold',onClick:nextGame}], [{label:'保存(JSON)',className:'green',onClick:exportJSON}]); renderAll(); }
+      if(win){ state.record.w++; if(my) my.w++; if(opp) opp.l++; currentHomePitcher().stats.w++; addLog(`勝利。`,'good'); }
+      else { state.record.l++; if(my) my.l++; if(opp) opp.w++; currentHomePitcher().stats.l++; addLog(`敗北。`,'bad'); }
+
+      // 他球場の試合を最後までシミュレートして結果を確定
+      let otherResultsText = '【他球場 最終結果】<br>';
+      if(g.otherMatches) {
+        g.otherMatches.forEach(m => {
+          while(m.inning <= 9) {
+            if(chance(22)) m.awayScore += randi(1,2);
+            if(chance(22)) m.homeScore += randi(1,2);
+            m.inning++;
+          }
+          if(m.homeScore === m.awayScore) { if(chance(50)) m.homeScore++; else m.awayScore++; }
+          
+          const hTeam = state.standings.find(t=>t.name === m.home);
+          const aTeam = state.standings.find(t=>t.name === m.away);
+          if(m.homeScore > m.awayScore) { hTeam.w++; aTeam.l++; } else { hTeam.l++; aTeam.w++; }
+          
+          otherResultsText += `${m.home} ${m.homeScore} - ${m.awayScore} ${m.away}<br>`;
+        });
+      }
+
+      if(win) {
+        showHeroInterview(otherResultsText);
+      } else {
+        state.mode = 'postgame'; 
+        setNarration('試合終了',`敗北しました。<br><br>${otherResultsText}`); 
+        setActions([{label:'次の試合へ',className:'gold',onClick:nextGame}], [{label:'保存(JSON)',className:'green',onClick:exportJSON}]); 
+        renderAll();
+      }
     }
 
     function nextGame(){
       state.scheduleIndex++;
       if(state.scheduleIndex >= state.seasonLen){ showEnding(); return; }
+      
+      state.roster.pitchers.forEach(p => {
+        if(p.restDays > 0) p.restDays--;
+      });
+      
       prepareNextGame();
     }
 
     function restoreView(){
       if(state.mode === 'title') showTitle();
-      else if(state.mode === 'ceremony') prepareNextGame();
+      else if(state.mode === 'select_starter') prepareNextGame();
+      else if(state.mode === 'ceremony') { 
+        setCurrentDisplayedNames();
+        setNarration('始球式 (First Pitch)','地元のアイドルによる始球式が行われます。<br>スタジアムは大歓声に包まれています！');
+        setActions([{label:'プレイボール！',className:'gold',onClick:startGame}], [{label:'保存(JSON)',className:'green',onClick:exportJSON}]);
+        renderAll();
+      }
       else if(state.mode === 'halftime') showHalftimeEvent();
       else if(state.mode === 'hero') showHeroInterview();
       else if(state.mode === 'ending') showEnding();
