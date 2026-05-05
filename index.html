@@ -245,52 +245,114 @@
     }
     .styled-select option { background: var(--bg2); color: var(--text); }
 
-    /* Tutorial Overlay */
+    /* Tutorial Overlay - カラフルでモダンなデザイン */
     #tutorialOverlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px);
+      background: rgba(10, 15, 30, 0.85); backdrop-filter: blur(8px);
       z-index: 9999; display: none; align-items: center; justify-content: center;
       padding: 20px;
     }
     .tutorial-card {
-      background: var(--card-bg); border: 1px solid var(--line);
-      border-radius: 22px; padding: 30px; max-width: 450px; width: 100%;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.5); text-align: center;
-      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 28px; padding: 40px 30px 30px; max-width: 480px; width: 100%;
+      text-align: center; position: relative; overflow: hidden;
+      transition: box-shadow 0.5s ease;
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .tutorial-card::before {
+      content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at top, rgba(255,255,255,0.1), transparent 60%);
+      pointer-events: none;
     }
     @keyframes popIn {
       from { opacity: 0; transform: scale(0.9); }
       to { opacity: 1; transform: scale(1); }
     }
+    .tutorial-icon {
+      font-size: 48px; width: 80px; height: 80px; margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      transition: background 0.5s ease;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
     .tutorial-title {
-      font-size: 22px; font-weight: 900; color: var(--gold); margin: 0 0 16px 0;
+      font-size: 26px; font-weight: 900; color: #fff; margin: 0 0 16px 0;
+      letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
     .tutorial-text {
-      font-size: 15px; line-height: 1.7; color: var(--text); margin-bottom: 24px; min-height: 90px;
+      font-size: 16px; line-height: 1.8; color: rgba(255,255,255,0.9);
+      margin-bottom: 30px; min-height: 100px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
     .tutorial-footer {
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex; flex-direction: column; align-items: center; gap: 24px;
     }
-    .tutorial-step { font-size: 13px; font-weight: bold; color: var(--muted); }
-    .tutorial-controls { display: flex; gap: 12px; }
+    .tutorial-dots {
+      display: flex; gap: 8px;
+    }
+    .tutorial-dots .dot {
+      width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.2);
+      transition: all 0.3s;
+    }
+    .tutorial-dots .dot.active {
+      width: 24px; border-radius: 5px;
+    }
+    .tutorial-controls { display: flex; gap: 16px; width: 100%; justify-content: center; }
+    .tut-btn {
+      appearance: none; border: none; border-radius: 16px; padding: 12px 24px;
+      font-size: 15px; font-weight: 900; cursor: pointer; color: #111;
+      transition: all 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      min-width: 120px;
+    }
+    .tut-btn:active { transform: scale(0.95); }
+    .tut-btn.skip { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
+    .tut-btn.skip:hover { background: rgba(255,255,255,0.2); }
+    .tut-btn.next { color: #000; }
 
-    /* Demo Overlay */
+    /* Demo Overlay - アーケード風の派手な演出 */
     #demoOverlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.1); /* 背景の曇り(blur)と暗さを取り除きました */
+      background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(255, 0, 100, 0.15) 100%);
+      box-shadow: inset 0 0 100px rgba(0,255,255,0.2);
       z-index: 9998; display: none; align-items: flex-end; justify-content: center;
-      padding-bottom: 80px; cursor: pointer;
+      padding-bottom: 12vh; cursor: pointer;
+      overflow: hidden;
     }
-    .demo-text {
-      text-align: center; color: var(--gold); font-size: 32px; font-weight: 900;
-      text-shadow: 0 4px 15px rgba(0,0,0,0.9), 0 0 20px rgba(255,214,108,0.5);
-      animation: blinkDemo 2s infinite; margin: 0; line-height: 1.2;
+    /* CRTスキャンラインエフェクト */
+    #demoOverlay::before {
+      content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 4px, 3px 100%; z-index: 2; pointer-events: none;
+    }
+    .demo-title-container {
+      position: relative; z-index: 10; text-align: center;
+      animation: floatDemo 4s ease-in-out infinite;
       pointer-events: none;
     }
-    .demo-text span { font-size: 20px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
+    .demo-text {
+      color: #fff; font-size: 48px; font-weight: 900; font-style: italic;
+      letter-spacing: 0.1em; margin: 0 0 15px 0; line-height: 1;
+      text-transform: uppercase;
+      text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff00de, 0 0 40px #ff00de, 0 0 80px #ff00de;
+      animation: neonPulse 1.5s infinite alternate;
+    }
+    .demo-subtitle {
+      font-size: 24px; color: #0ff; font-weight: 900; letter-spacing: 0.2em;
+      text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff;
+      animation: blinkDemo 1s infinite steps(1);
+    }
+    @keyframes neonPulse {
+      from { text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff00de, 0 0 40px #ff00de, 0 0 80px #ff00de; }
+      to { text-shadow: 0 0 2px #fff, 0 0 5px #fff, 0 0 10px #ff00de, 0 0 20px #ff00de, 0 0 40px #ff00de; }
+    }
+    @keyframes floatDemo {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
     @keyframes blinkDemo {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
+      50% { opacity: 0; }
     }
 
     @media (max-width: 1180px) { .app, .top-panels, .game-layout { grid-template-columns: 1fr; } }
@@ -299,21 +361,23 @@
       .actions.secondary { grid-template-columns: 1fr; } .mini-grid { grid-template-columns: 1fr; }
       .slot-actions button, .actions button { width: 100%; }
       .tutorial-card { padding: 20px; }
-      .demo-text { font-size: 26px; }
+      .demo-text { font-size: 32px; }
+      .demo-subtitle { font-size: 18px; }
     }
   </style>
 </head>
 <body>
   <!-- チュートリアルオーバーレイ -->
   <div id="tutorialOverlay">
-    <div class="tutorial-card">
+    <div class="tutorial-card" id="tutorialCard">
+      <div class="tutorial-icon" id="tutorialIcon">✨</div>
       <h3 class="tutorial-title" id="tutorialTitle">Title</h3>
       <p class="tutorial-text" id="tutorialText">Text</p>
       <div class="tutorial-footer">
-        <span class="tutorial-step" id="tutorialStep">1 / 10</span>
+        <div class="tutorial-dots" id="tutorialDots"></div>
         <div class="tutorial-controls">
-          <button id="tutorialSkip" class="secondary" style="padding: 8px 16px;">スキップ</button>
-          <button id="tutorialNext" class="gold" style="padding: 8px 20px;">次へ</button>
+          <button id="tutorialSkip" class="tut-btn skip">スキップ</button>
+          <button id="tutorialNext" class="tut-btn next">次へ</button>
         </div>
       </div>
     </div>
@@ -321,7 +385,10 @@
 
   <!-- デモオーバーレイ -->
   <div id="demoOverlay">
-    <h1 class="demo-text">DEMONSTRATION<br><span>CLICK TO START</span></h1>
+    <div class="demo-title-container">
+      <h1 class="demo-text">DEMONSTRATION</h1>
+      <div class="demo-subtitle">- CLICK TO START -</div>
+    </div>
   </div>
 
   <div class="app">
@@ -443,23 +510,20 @@
     
     // ---- TUTORIAL SYSTEM ----
     const TUTORIAL_STEPS = [
-      { title: "ようこそ！", text: "Pennant Manager DXへようこそ！<br>あなたは今日から「TOKYO BLUE STARS」の監督です。<br>このチュートリアルでは基本的な遊び方を説明します。" },
-      { title: "ゲームの目的", text: "監督として選手にサインを出し、ペナントレースを勝ち抜いて日本一を目指しましょう。<br>試合状況に応じた的確な指示が勝敗を分けます。" },
-      { title: "試合準備（先発選択）", text: "試合前には先発投手を選びます。<br>投手にはスタミナがあり、登板後は中数日の休養が必要です。ローテーションを考えて起用しましょう。" },
-      { title: "守備采配", text: "守備時は「勝負」「一球外す」などのサインを出します。<br>投手のスタミナや能力、相手打者の強さを見極めて指示を出しましょう。" },
-      { title: "投球モード（球種指定）", text: "「AUTO/指定切替」でマニュアルモードにすると、投手の持つ「ストレート」や「変化球」などの球種を1球ごとに細かく指定できます。" },
-      { title: "攻撃采配", text: "攻撃時は「打たせる」「強振」「バント」などのサインがあります。<br>確実にランナーを進めるか、一発を狙うか、状況に応じて使い分けましょう。" },
-      { title: "代打と盗塁", text: "チャンスの場面では「代打」を起用したり、足の速いランナーがいる時は「盗塁」を指示して、試合を有利に進めましょう。" },
-      { title: "選手の特性", text: "選手には「エース」「ホームランバッター」「盗塁王」などの特性があります。<br>これらの特性を持つ選手は、特定の状況で能力がアップします。" },
-      { title: "成績と順位", text: "試合の結果は、左側のパネルの「League Standing (順位表)」や、右下の「成績 / ベンチ」に反映されます。チームを上位に導きましょう。" },
-      { title: "セーブとロード", text: "左側の「Save / Load」パネルから、現在のゲームデータを保存（ダウンロード）したり、読み込んだりできます。<br><br>それでは、健闘を祈ります！" }
+      { icon: '✨', color: '#ff7eb3', bg: 'linear-gradient(135deg, #ff7eb3, #ff758c)', title: "ようこそ！", text: "Pennant Manager DXへようこそ！<br>あなたは今日から「TOKYO BLUE STARS」の監督です。<br>このチュートリアルでは基本的な遊び方を説明します。" },
+      { icon: '🏆', color: '#ffd66c', bg: 'linear-gradient(135deg, #ffe6a2, #ffd66c)', title: "ゲームの目的", text: "監督として選手にサインを出し、ペナントレースを勝ち抜いて日本一を目指しましょう。<br>試合状況に応じた的確な指示が勝敗を分けます。" },
+      { icon: '⚾', color: '#7dcaff', bg: 'linear-gradient(135deg, #aee5ff, #7dcaff)', title: "試合準備", text: "試合前には先発投手を選びます。<br>投手にはスタミナがあり、登板後は中数日の休養が必要です。ローテーションを考えて起用しましょう。" },
+      { icon: '🧤', color: '#88ecb1', bg: 'linear-gradient(135deg, #bcf2cf, #88ecb1)', title: "守備采配", text: "守備時は「勝負」「一球外す」などのサインを出します。<br>投手のスタミナや能力、相手打者の強さを見極めて指示を出しましょう。" },
+      { icon: '🎯', color: '#c8adff', bg: 'linear-gradient(135deg, #e4d6ff, #c8adff)', title: "投球モード", text: "「AUTO/指定切替」でマニュアルモードにすると、投手の持つ「ストレート」や「変化球」などの球種を1球ごとに細かく指定できます。" },
+      { icon: '🦇', color: '#ffb66c', bg: 'linear-gradient(135deg, #ffd6a8, #ffb66c)', title: "攻撃采配", text: "攻撃時は「打たせる」「強振」「バント」などのサインがあります。<br>確実にランナーを進めるか、一発を狙うか、状況に応じて使い分けましょう。" },
+      { icon: '🏃', color: '#ff9ca2', bg: 'linear-gradient(135deg, #ffbdc2, #ff9ca2)', title: "代打と盗塁", text: "チャンスの場面では「代打」を起用したり、足の速いランナーがいる時は「盗塁」を指示して、試合を有利に進めましょう。" },
+      { icon: '⭐', color: '#ffd66c', bg: 'linear-gradient(135deg, #ffe6a2, #ffd66c)', title: "選手の特性", text: "選手には「エース」「ホームランバッター」「盗塁王」などの特性があります。<br>これらの特性を持つ選手は、特定の状況で能力がアップします。" },
+      { icon: '📈', color: '#7dcaff', bg: 'linear-gradient(135deg, #aee5ff, #7dcaff)', title: "成績と順位", text: "試合の結果は、左側のパネルの「League Standing (順位表)」や、右下の「成績 / ベンチ」に反映されます。チームを上位に導きましょう。" },
+      { icon: '💾', color: '#88ecb1', bg: 'linear-gradient(135deg, #bcf2cf, #88ecb1)', title: "セーブとロード", text: "左側の「Save / Load」パネルから、現在のゲームデータを保存（ダウンロード）したり、読み込んだりできます。<br><br>それでは、健闘を祈ります！" }
     ];
 
     let currentTutorialStep = 0;
     const tutorialOverlay = $('tutorialOverlay');
-    const tutorialTitle = $('tutorialTitle');
-    const tutorialText = $('tutorialText');
-    const tutorialStep = $('tutorialStep');
     const tutorialNext = $('tutorialNext');
     const tutorialSkip = $('tutorialSkip');
 
@@ -471,14 +535,23 @@
 
     function updateTutorialUI() {
       const step = TUTORIAL_STEPS[currentTutorialStep];
-      tutorialTitle.innerHTML = step.title;
-      tutorialText.innerHTML = step.text;
-      tutorialStep.innerText = `${currentTutorialStep + 1} / ${TUTORIAL_STEPS.length}`;
+      $('tutorialTitle').innerHTML = step.title;
+      $('tutorialText').innerHTML = step.text;
+      $('tutorialIcon').innerText = step.icon;
       
+      $('tutorialCard').style.boxShadow = `0 20px 50px ${step.color}30`;
+      $('tutorialIcon').style.background = step.bg;
+      $('tutorialNext').style.background = step.bg;
+      $('tutorialNext').style.boxShadow = `0 8px 20px ${step.color}60`;
+      
+      $('tutorialDots').innerHTML = TUTORIAL_STEPS.map((s, i) => 
+        `<span class="dot ${i === currentTutorialStep ? 'active' : ''}" style="${i === currentTutorialStep ? 'background:' + step.color : ''}"></span>`
+      ).join('');
+
       if (currentTutorialStep === TUTORIAL_STEPS.length - 1) {
-        tutorialNext.innerText = '始める';
+        $('tutorialNext').innerText = '始める';
       } else {
-        tutorialNext.innerText = '次へ';
+        $('tutorialNext').innerText = '次へ';
       }
     }
 
@@ -496,7 +569,8 @@
     function endTutorial() {
       tutorialOverlay.style.display = 'none';
       localStorage.setItem('pmdx_tutorial_done', 'true');
-      resetIdleTimer();
+      // チュートリアル終了後はすぐにデモを開始
+      startDemo();
     }
 
     // ---- THEME & SYSTEM ----
@@ -536,6 +610,7 @@
         showTitle();
         addLog('ゲームデータを初期化しました。', 'special');
         this.textContent = 'データをリセット';
+        stopDemo();
         setTimeout(showTutorial, 400); 
       }
     });
@@ -801,10 +876,6 @@
       
       state = createState();
       showTitle();
-      
-      if (!localStorage.getItem('pmdx_tutorial_done')) {
-        setTimeout(showTutorial, 400);
-      }
     }
 
     function runDemoStep() {
@@ -1763,8 +1834,12 @@
       }
     }
 
-    // ゲーム起動（いきなりデモを開始する）
-    startDemo();
+    // ---- 起動時のフロー制御 ----
+    if (!localStorage.getItem('pmdx_tutorial_done')) {
+      showTutorial();
+    } else {
+      startDemo();
+    }
 
   })();
   </script>
