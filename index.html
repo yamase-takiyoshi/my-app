@@ -1485,7 +1485,7 @@
       setActions(
         [{label:'勝負',className:'gold',onClick:()=>resolvePitch('attack')}, {label:'一球外す',className:'orange',onClick:()=>resolvePitch('waste')},
          {label:'申告敬遠',className:'purple',onClick:()=>resolvePitch('ibb')}, {label:'牽制',className:'secondary',onClick:()=>resolvePitch('pickoff')}],
-        [{label:'AUTO/指定切替',onClick:toggleMode}, {label:'球種指定',className:'purple',onClick:pickPitch,disabled:state.game.pitchMode!=='manual'},
+        [{label:'球種オート/球種選択切替',onClick:toggleMode}, {label:'球種指定',className:'purple',onClick:pickPitch,disabled:state.game.pitchMode!=='manual'},
          {label:'継投',onClick:changePitcherMenu}, {label:'1試合クリアー',className:'red',onClick:confirmRestartGame}]
       );
     }
