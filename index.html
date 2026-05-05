@@ -245,15 +245,60 @@
     }
     .styled-select option { background: var(--bg2); color: var(--text); }
 
+    /* Tutorial Overlay */
+    #tutorialOverlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px);
+      z-index: 9999; display: none; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .tutorial-card {
+      background: var(--card-bg); border: 1px solid var(--line);
+      border-radius: 22px; padding: 30px; max-width: 450px; width: 100%;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.5); text-align: center;
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .tutorial-title {
+      font-size: 22px; font-weight: 900; color: var(--gold); margin: 0 0 16px 0;
+    }
+    .tutorial-text {
+      font-size: 15px; line-height: 1.7; color: var(--text); margin-bottom: 24px; min-height: 90px;
+    }
+    .tutorial-footer {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .tutorial-step { font-size: 13px; font-weight: bold; color: var(--muted); }
+    .tutorial-controls { display: flex; gap: 12px; }
+
     @media (max-width: 1180px) { .app, .top-panels, .game-layout { grid-template-columns: 1fr; } }
     @media (max-width: 760px) {
       body { padding: 8px; } .scoreboard { grid-template-columns: 1fr auto auto; }
       .actions.secondary { grid-template-columns: 1fr; } .mini-grid { grid-template-columns: 1fr; }
       .slot-actions button, .actions button { width: 100%; }
+      .tutorial-card { padding: 20px; }
     }
   </style>
 </head>
 <body>
+  <!-- チュートリアルオーバーレイ -->
+  <div id="tutorialOverlay">
+    <div class="tutorial-card">
+      <h3 class="tutorial-title" id="tutorialTitle">Title</h3>
+      <p class="tutorial-text" id="tutorialText">Text</p>
+      <div class="tutorial-footer">
+        <span class="tutorial-step" id="tutorialStep">1 / 10</span>
+        <div class="tutorial-controls">
+          <button id="tutorialSkip" class="secondary" style="padding: 8px 16px;">スキップ</button>
+          <button id="tutorialNext" class="gold" style="padding: 8px 20px;">次へ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="app">
     <aside class="sidebar card">
       <section class="hero">
@@ -369,8 +414,67 @@
 
   <script>
   (() => {
+    const $ = id => document.getElementById(id);
+    
+    // ---- TUTORIAL SYSTEM ----
+    const TUTORIAL_STEPS = [
+      { title: "ようこそ！", text: "Pennant Manager DXへようこそ！<br>あなたは今日から「TOKYO BLUE STARS」の監督です。<br>このチュートリアルでは基本的な遊び方を説明します。" },
+      { title: "ゲームの目的", text: "監督として選手にサインを出し、ペナントレースを勝ち抜いて日本一を目指しましょう。<br>試合状況に応じた的確な指示が勝敗を分けます。" },
+      { title: "試合準備（先発選択）", text: "試合前には先発投手を選びます。<br>投手にはスタミナがあり、登板後は中数日の休養が必要です。ローテーションを考えて起用しましょう。" },
+      { title: "守備采配", text: "守備時は「勝負」「一球外す」などのサインを出します。<br>投手のスタミナや能力、相手打者の強さを見極めて指示を出しましょう。" },
+      { title: "投球モード（球種指定）", text: "「AUTO/指定切替」でマニュアルモードにすると、投手の持つ「ストレート」や「変化球」などの球種を1球ごとに細かく指定できます。" },
+      { title: "攻撃采配", text: "攻撃時は「打たせる」「強振」「バント」などのサインがあります。<br>確実にランナーを進めるか、一発を狙うか、状況に応じて使い分けましょう。" },
+      { title: "代打と盗塁", text: "チャンスの場面では「代打」を起用したり、足の速いランナーがいる時は「盗塁」を指示して、試合を有利に進めましょう。" },
+      { title: "選手の特性", text: "選手には「エース」「ホームランバッター」「盗塁王」などの特性があります。<br>これらの特性を持つ選手は、特定の状況で能力がアップします。" },
+      { title: "成績と順位", text: "試合の結果は、左側のパネルの「League Standing (順位表)」や、右下の「成績 / ベンチ」に反映されます。チームを上位に導きましょう。" },
+      { title: "セーブとロード", text: "左側の「Save / Load」パネルから、現在のゲームデータを保存（ダウンロード）したり、読み込んだりできます。<br><br>それでは、健闘を祈ります！" }
+    ];
+
+    let currentTutorialStep = 0;
+    const tutorialOverlay = $('tutorialOverlay');
+    const tutorialTitle = $('tutorialTitle');
+    const tutorialText = $('tutorialText');
+    const tutorialStep = $('tutorialStep');
+    const tutorialNext = $('tutorialNext');
+    const tutorialSkip = $('tutorialSkip');
+
+    function showTutorial() {
+      tutorialOverlay.style.display = 'flex';
+      currentTutorialStep = 0;
+      updateTutorialUI();
+    }
+
+    function updateTutorialUI() {
+      const step = TUTORIAL_STEPS[currentTutorialStep];
+      tutorialTitle.innerHTML = step.title;
+      tutorialText.innerHTML = step.text;
+      tutorialStep.innerText = `${currentTutorialStep + 1} / ${TUTORIAL_STEPS.length}`;
+      
+      if (currentTutorialStep === TUTORIAL_STEPS.length - 1) {
+        tutorialNext.innerText = '始める';
+      } else {
+        tutorialNext.innerText = '次へ';
+      }
+    }
+
+    tutorialNext.addEventListener('click', () => {
+      if (currentTutorialStep < TUTORIAL_STEPS.length - 1) {
+        currentTutorialStep++;
+        updateTutorialUI();
+      } else {
+        endTutorial();
+      }
+    });
+
+    tutorialSkip.addEventListener('click', endTutorial);
+
+    function endTutorial() {
+      tutorialOverlay.style.display = 'none';
+      localStorage.setItem('pmdx_tutorial_done', 'true');
+    }
+
     // ---- THEME & SYSTEM ----
-    const themeSelect = document.getElementById('themeSelect');
+    const themeSelect = $('themeSelect');
     const savedTheme = localStorage.getItem('pmdx_theme') || 'system';
     themeSelect.value = savedTheme;
 
@@ -396,15 +500,17 @@
     });
     applyTheme(savedTheme);
 
-    document.getElementById('btnReset').addEventListener('click', function() {
+    $('btnReset').addEventListener('click', function() {
       if(this.textContent === 'データをリセット') {
         this.textContent = '本当にリセット？(確認)';
         setTimeout(() => { if(this.textContent === '本当にリセット？(確認)') this.textContent = 'データをリセット'; }, 3000);
       } else {
+        localStorage.removeItem('pmdx_tutorial_done');
         state = createState();
         showTitle();
         addLog('ゲームデータを初期化しました。', 'special');
         this.textContent = 'データをリセット';
+        setTimeout(showTutorial, 400); // リセット後、チュートリアルを再表示
       }
     });
 
@@ -497,7 +603,6 @@
       [[0,5], [1,2], [3,4]]
     ];
 
-    const $ = id => document.getElementById(id);
     const els = {
       standingsBox:$('standingsBox'), saveSlots:$('saveSlots'), scoreLabel:$('scoreLabel'),
       phasePill:$('phasePill'), modePill:$('modePill'), pitchTypePill:$('pitchTypePill'), inningPill:$('inningPill'),
@@ -1540,6 +1645,11 @@
     }
 
     showTitle();
+
+    // チュートリアルの表示判定
+    if (!localStorage.getItem('pmdx_tutorial_done')) {
+      setTimeout(showTutorial, 400);
+    }
   })();
   </script>
 </body>
